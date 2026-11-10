@@ -639,6 +639,8 @@ game.onEnd = (res) => {
   renderCareer();
   renderCamos();
   $('btn-again').style.display = net.role === 'client' ? 'none' : '';
+  $('end-client-note').classList.toggle('hidden', net.role !== 'client');
+  $('btn-menu').textContent = net.role === 'client' ? 'Back to Room' : 'Main Menu';
   $('end').classList.remove('hidden');
 };
 
@@ -671,12 +673,22 @@ async function copyText(text, btn, label = 'Copied!') {
 
 $('btn-host').addEventListener('click', () => {
   uiClick();
-  net.hostRoom();
+  net.hostRoom('ffa');
+});
+
+$('btn-host-tdm').addEventListener('click', () => {
+  uiClick();
+  net.hostRoom('tdm');
 });
 
 $('btn-host-tva').addEventListener('click', () => {
   uiClick();
   net.hostRoom('tva');
+});
+
+$('btn-host-gg').addEventListener('click', () => {
+  uiClick();
+  net.hostRoom('gungame');
 });
 
 function submitJoin() {
@@ -739,6 +751,37 @@ function renderRoomState(st) {
   statusEl.textContent = st.error || st.status || '';
   statusEl.classList.toggle('err', Boolean(st.error));
 
+  const isClient = st.role === 'client';
+  const modePillsEl = $('room-mode-pills');
+  modePillsEl.innerHTML = MODES.map((m) => `
+    <button type="button" class="room-mode-pill ${cfg.mode === m.id ? 'active' : ''}"
+      data-rmode="${m.id}" ${isClient ? 'disabled' : ''}>${esc(m.name)}</button>
+  `).join('');
+  if (!isClient) {
+    modePillsEl.querySelectorAll('[data-rmode]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        uiClick();
+        cfg.mode = btn.dataset.rmode;
+        if (cfg.mode === 'tva' && cfg.bots === 0) cfg.bots = 7;
+        net.broadcastLobby();
+      });
+    });
+  }
+
+  const mapName = (MAPS.find((m) => m.id === cfg.mapId) || MAPS[0]).name;
+  const diffLabel = (DIFFICULTIES[cfg.difficulty] || DIFFICULTIES.normal).label;
+  const activeMuts = MUTATORS.filter((m) => cfg.mutators[m.key]).map((m) => m.label);
+  const metaTags = [
+    mapName,
+    `${cfg.bots} Bot${cfg.bots === 1 ? '' : 's'}${cfg.bots > 0 ? ` (${diffLabel})` : ''}`,
+    cfg.mode === 'gungame' ? '16 Weapons' : `${cfg.scoreLimit} Kills`,
+    `${Math.round(cfg.timeLimit / 60)} min`,
+  ];
+  $('room-meta').innerHTML = [
+    ...metaTags.map((t) => `<span class="room-meta-tag">${esc(t)}</span>`),
+    ...activeMuts.map((m) => `<span class="room-meta-tag mut">${esc(m)}</span>`),
+  ].join('');
+
   const membersEl = $('room-members');
   const isTeam = cfg.mode === 'tdm' || cfg.mode === 'tva';
   const teamTag = (team) => (cfg.mode === 'tva' ? (team === 0 ? 'AT' : 'T') : (team === 0 ? 'BLUE' : 'RED'));
@@ -760,7 +803,6 @@ function renderRoomState(st) {
     });
   }
 
-  const isClient = st.role === 'client';
   botsInput.value = String(cfg.bots);
   botsVal.textContent = String(cfg.bots);
   scoreSel.value = String(cfg.scoreLimit);

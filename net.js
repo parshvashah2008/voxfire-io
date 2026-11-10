@@ -224,8 +224,11 @@ class RoomNet {
       cfg.mode = 'tva';
       cfg.bots = 7;
       cfg.scoreLimit = 25;
-    } else if (cfg.bots === 7) {
-      cfg.bots = 0; // default pure PvP with friends (host can raise slider anytime)
+    } else {
+      if (presetMode) cfg.mode = presetMode;
+      if (cfg.bots === 7) {
+        cfg.bots = 0; // default pure PvP with friends (host can raise slider anytime)
+      }
     }
     this.startBgLoop();
     this.setStatus(`Creating room ${code}...`);
@@ -519,6 +522,12 @@ class RoomNet {
     rec.conn.send({ t: 'pickup', k: kind });
   }
 
+  onRemoteStreak(char, streakName) {
+    const rec = this.peers.get(char.peerId);
+    if (!rec || !rec.conn.open) return;
+    rec.conn.send({ t: 'streak', s: streakName });
+  }
+
   onHostKill(victim, killer, weaponId, head, weaponName, killerCol, victimCol) {
     if (this.role !== 'host') return;
     this.broadcast({
@@ -586,7 +595,7 @@ class RoomNet {
         team: c.team,
         alive: c.alive,
         extra: cfg.mode === 'gungame'
-          ? `Lv ${c.ggLevel + 1} · ${findWeapon(GG_ORDER[Math.min(c.ggLevel, GG_ORDER.length - 1)]).name}`
+          ? `Lv ${Math.min(c.ggLevel + 1, GG_ORDER.length)} · ${findWeapon(GG_ORDER[Math.min(c.ggLevel, GG_ORDER.length - 1)]).name}`
           : undefined,
       }));
     this.broadcast({
@@ -679,7 +688,9 @@ class RoomNet {
           ? 999
           : def.damage * (h.head ? def.headMult : 1) * rangeMult;
         const pt = origin.clone().addScaledVector(dir, h.t);
-        game.effects.blood(pt, h.head);
+        if (!cfg.mutators.headshotsOnly || h.head || def.kind === 'melee') {
+          game.effects.blood(pt, h.head);
+        }
         game.damage(h.c, c, dmg, { head: h.head, weapon: def.id, explosive: false, from: origin });
       }
 
@@ -943,6 +954,22 @@ class RoomNet {
         }
         break;
       }
+      case 'streak': {
+        if (!game.player) return;
+        sound.streak();
+        if (msg.s === 'RADAR') {
+          game.radarT = 25;
+          game.hud.announce('RADAR ONLINE', 'Enemies revealed on the minimap');
+        } else if (msg.s === 'OVERDRIVE') {
+          game.overdriveT = 12;
+          game.hud.announce('OVERDRIVE', 'Speed, fire rate & infinite ammo');
+        } else if (msg.s === 'AIRSTRIKE') {
+          game.hud.announce('AIRSTRIKE INBOUND', 'Bombing enemy positions');
+        } else if (msg.s === 'ORBITAL') {
+          game.hud.announce('ORBITAL STRIKE', 'Impact in 4 seconds');
+        }
+        break;
+      }
       case 'kill': {
         this.handleClientKill(msg);
         break;
@@ -1071,6 +1098,7 @@ class RoomNet {
         });
       }
       if (!c) continue;
+      const prevGg = c.ggLevel;
       c.health = hp;
       c.alive = Boolean(alive);
       c.shield = shield ? 1 : 0;
@@ -1083,6 +1111,9 @@ class RoomNet {
       c.team = team;
 
       if (c === game.player) {
+        if (game.cfg.mode === 'gungame' && ggLevel !== prevGg && ggLevel < GG_ORDER.length) {
+          game.giveLoadout(c);
+        }
         continue;
       }
       if (!c.netPos) c.netPos = new THREE.Vector3(x, y, z);
