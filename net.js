@@ -33,6 +33,7 @@ const ICE_CONFIG = {
   ],
 };
 
+const isTeamMode = (mode) => mode === 'tdm' || mode === 'tva';
 const r2 = (n) => Math.round(n * 100) / 100;
 const r3 = (n) => Math.round(n * 1000) / 1000;
 const r4 = (n) => Math.round(n * 10000) / 10000;
@@ -102,6 +103,7 @@ class RoomNet {
     this.members = [];      // synced lobby list
     this.snapAcc = 0;
     this.clientAcc = 0;
+    this.bgTimer = null;
     this.clientProjectiles = [];
     this.listeners = new Set();
   }
@@ -140,6 +142,10 @@ class RoomNet {
   }
 
   destroyPeer() {
+    if (this.bgTimer) {
+      clearInterval(this.bgTimer);
+      this.bgTimer = null;
+    }
     this.cleanupClientProjectiles();
     for (const rec of this.peers.values()) {
       try { rec.conn.close(); } catch {}
@@ -184,7 +190,24 @@ class RoomNet {
 
   /* ============================== HOST ============================== */
 
-  hostRoom() {
+  startBgLoop() {
+    if (this.bgTimer) clearInterval(this.bgTimer);
+    let last = performance.now();
+    this.bgTimer = setInterval(() => {
+      const now = performance.now();
+      const dt = Math.min(0.05, Math.max(0.001, (now - last) / 1000));
+      last = now;
+      if (
+        this.role === 'host'
+        && document.hidden
+        && (game.state === 'playing' || game.state === 'paused')
+      ) {
+        game.update(dt);
+      }
+    }, 50);
+  }
+
+  hostRoom(presetMode = null) {
     if (!window.Peer) {
       this.setStatus('', 'Multiplayer library failed to load. Check internet connection.');
       return;
@@ -197,9 +220,14 @@ class RoomNet {
     this.nextId = 100;
     this.hostTeam = 0;
     game.netMode = 'host';
-    if (cfg.bots === 7) {
+    if (presetMode === 'tva') {
+      cfg.mode = 'tva';
+      cfg.bots = 7;
+      cfg.scoreLimit = 25;
+    } else if (cfg.bots === 7) {
       cfg.bots = 0; // default pure PvP with friends (host can raise slider anytime)
     }
+    this.startBgLoop();
     this.setStatus(`Creating room ${code}...`);
 
     const peer = new window.Peer(PEER_PREFIX + code, { debug: 1, config: ICE_CONFIG });
@@ -336,7 +364,7 @@ class RoomNet {
   }
 
   createRemoteChar(rec) {
-    const isTdm = cfg.mode === 'tdm';
+    const isTdm = isTeamMode(cfg.mode);
     const team = isTdm ? rec.team : rec.id;
     const col = isTdm ? TEAM_COLORS[rec.team] : rec.color;
     const c = new Player(rec.id, rec.name, team, false, col);
@@ -392,7 +420,7 @@ class RoomNet {
   }
 
   swapMemberTeam(memberId) {
-    if (this.role !== 'host' || cfg.mode !== 'tdm') return;
+    if (this.role !== 'host' || !isTeamMode(cfg.mode)) return;
     if (memberId === 0) {
       this.hostTeam = 1 - this.hostTeam;
     } else {
@@ -428,7 +456,7 @@ class RoomNet {
 
   populateHostMatch() {
     if (this.role !== 'host') return;
-    if (cfg.mode === 'tdm' && game.player) {
+    if (isTeamMode(cfg.mode) && game.player) {
       game.player.team = this.hostTeam;
       game.player.color = TEAM_COLORS[this.hostTeam];
     }
@@ -578,6 +606,7 @@ class RoomNet {
     c.yaw = msg.yaw;
     c.pitch = msg.pitch;
     c.crouch = Boolean(msg.cr);
+    c.height = c.crouch ? 1.25 : 1.8;
     c.slide = msg.sl ? 0.4 : 0;
     c.input.ads = Boolean(msg.ad);
     c.input.sprint = Boolean(msg.sp);
@@ -588,7 +617,7 @@ class RoomNet {
 
   handleClientShoot(rec, msg) {
     const c = rec.char;
-    if (!c.alive || game.state !== 'playing') return;
+    if (!c.alive || (game.state !== 'playing' && game.state !== 'paused')) return;
     const def = findWeapon(msg.w);
     if (!def) return;
 
@@ -679,7 +708,7 @@ class RoomNet {
 
   handleClientGrenade(rec, msg) {
     const c = rec.char;
-    if (!c.alive || c.grenades <= 0 || c.grenadeCd > 0) return;
+    if (!c.alive || (game.state !== 'playing' && game.state !== 'paused') || c.grenades <= 0 || c.grenadeCd > 0) return;
     c.grenades--;
     c.grenadeCd = 1;
     const eye = c.eye(new THREE.Vector3());
@@ -943,7 +972,7 @@ class RoomNet {
 
   addRemoteClientChar(data) {
     if (!data || game.chars.some((c) => c.id === data.id)) return null;
-    const isTdm = game.cfg.mode === 'tdm';
+    const isTdm = isTeamMode(game.cfg.mode);
     const isMe = data.id === this.myId;
     const c = new Player(data.id, data.name, data.team, isMe, data.color);
     c.pos.set(data.x, data.y, data.z);
@@ -999,9 +1028,11 @@ class RoomNet {
 
     const modeTitle = game.cfg.mode === 'ffa'
       ? 'FREE FOR ALL'
-      : game.cfg.mode === 'tdm'
-        ? 'TEAM DEATHMATCH'
-        : 'GUN GAME';
+      : game.cfg.mode === 'tva'
+        ? '4v4 TERRORISTS VS ANTI-TERRORISTS'
+        : game.cfg.mode === 'tdm'
+          ? 'TEAM DEATHMATCH'
+          : 'GUN GAME';
     game.hud.announce(
       modeTitle,
       game.cfg.mode === 'gungame' ? 'Every kill upgrades your weapon' : `First to ${game.cfg.scoreLimit} kills`,
@@ -1030,7 +1061,7 @@ class RoomNet {
           id,
           name: `Player${id}`,
           team,
-          color: game.cfg.mode === 'tdm' ? TEAM_COLORS[team] : FFA_COLORS[id % FFA_COLORS.length],
+          color: isTeamMode(game.cfg.mode) ? TEAM_COLORS[team] : FFA_COLORS[id % FFA_COLORS.length],
           x,
           y,
           z,
@@ -1060,6 +1091,7 @@ class RoomNet {
       c.netYaw = yaw;
       c.netPitch = pitch;
       c.crouch = Boolean(crouch);
+      c.height = c.crouch ? 1.25 : 1.8;
       if (c.model) {
         c.model.setGun(findWeapon(wid));
       }
@@ -1247,6 +1279,7 @@ class RoomNet {
       title: msg.title,
       rows,
       teams,
+      mode: msg.cfg?.mode,
     });
   }
 

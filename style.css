@@ -1749,6 +1749,17 @@ tr.dead {
   border-radius: 8px;
 }
 
+.btn.accent-tva {
+  background: linear-gradient(135deg, rgba(43, 127, 255, 0.25), rgba(232, 72, 56, 0.28));
+  border-color: rgba(255, 138, 76, 0.55);
+  color: #fff2e8;
+}
+
+.btn.accent-tva:hover {
+  border-color: #ff9f43;
+  box-shadow: 0 0 14px rgba(255, 138, 76, 0.28);
+}
+
 .room-head {
   display: flex;
   align-items: center;

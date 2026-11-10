@@ -23,6 +23,7 @@ const {
 const MODES = [
   { id: 'ffa', name: 'Free For All', desc: 'Every player for themselves. First to score limit wins.' },
   { id: 'tdm', name: 'Team Deathmatch', desc: 'Blue vs Red squad combat. Coordinate and control the arena.' },
+  { id: 'tva', name: '4v4 T vs AT', desc: 'Terrorists vs Anti-Terrorists 4v4 tactical squad battle.' },
   { id: 'gungame', name: 'Gun Game', desc: '16-weapon progression ladder. Knife kills demote enemies.' },
 ];
 
@@ -119,6 +120,11 @@ function renderModes() {
       if (net.role === 'client') return;
       uiClick();
       cfg.mode = btn.dataset.mode;
+      if (cfg.mode === 'tva' && cfg.bots === 0) {
+        cfg.bots = 7;
+        botsInput.value = '7';
+        botsVal.textContent = '7';
+      }
       renderModes();
       if (net.role === 'host') net.broadcastLobby();
     });
@@ -564,7 +570,7 @@ function ordinal(n) {
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
-function renderEndBoard(rows, teams) {
+function renderEndBoard(rows, teams, mode = 'tdm') {
   const head = '<tr><th>#</th><th>Player</th><th>K</th><th>D</th><th>A</th><th>Score</th></tr>';
   const makeRows = (list) => list.map((l, idx) => `
     <tr class="${l.isPlayer ? 'me' : ''}">
@@ -579,9 +585,10 @@ function renderEndBoard(rows, teams) {
 
   const host = $('end-board');
   if (teams) {
+    const names = mode === 'tva' ? ['ANTI-TERRORISTS', 'TERRORISTS'] : ['BLUE', 'RED'];
     host.innerHTML = `<div class="sb-teams">${[0, 1].map((t) => `
       <table class="team${t}">
-        <caption>${t === 0 ? 'BLUE' : 'RED'}</caption>
+        <caption>${names[t]}</caption>
         ${head}${makeRows(rows.filter((r) => r.team === t))}
       </table>
     `).join('')}</div>`;
@@ -627,7 +634,7 @@ game.onEnd = (res) => {
       ? `Next Camo (${nextLocked.name}): ${profile.kills} / ${nextLocked.unlock} kills`
       : 'All camos unlocked!';
 
-  renderEndBoard(res.rows, res.teams);
+  renderEndBoard(res.rows, res.teams, res.mode);
   renderPlayerChip();
   renderCareer();
   renderCamos();
@@ -665,6 +672,11 @@ async function copyText(text, btn, label = 'Copied!') {
 $('btn-host').addEventListener('click', () => {
   uiClick();
   net.hostRoom();
+});
+
+$('btn-host-tva').addEventListener('click', () => {
+  uiClick();
+  net.hostRoom('tva');
 });
 
 function submitJoin() {
@@ -728,17 +740,18 @@ function renderRoomState(st) {
   statusEl.classList.toggle('err', Boolean(st.error));
 
   const membersEl = $('room-members');
-  const isTdm = cfg.mode === 'tdm';
+  const isTeam = cfg.mode === 'tdm' || cfg.mode === 'tva';
+  const teamTag = (team) => (cfg.mode === 'tva' ? (team === 0 ? 'AT' : 'T') : (team === 0 ? 'BLUE' : 'RED'));
   membersEl.innerHTML = (st.members || []).map((m) => `
-    <button type="button" class="member-pill ${m.isHost ? 'host' : ''} ${isTdm ? `team${m.team}` : ''}"
-      data-mid="${m.id}" ${st.role === 'host' && isTdm ? 'title="Click to swap team"' : ''}>
-      ${isTdm ? `<em>${m.team === 0 ? 'BLUE' : 'RED'}</em>` : ''}
+    <button type="button" class="member-pill ${m.isHost ? 'host' : ''} ${isTeam ? `team${m.team}` : ''}"
+      data-mid="${m.id}" ${st.role === 'host' && isTeam ? 'title="Click to swap team"' : ''}>
+      ${isTeam ? `<em>${teamTag(m.team)}</em>` : ''}
       <span>${esc(m.name)}</span>
       ${m.isHost ? '<small>HOST</small>' : ''}
     </button>
   `).join('');
 
-  if (st.role === 'host' && isTdm) {
+  if (st.role === 'host' && isTeam) {
     membersEl.querySelectorAll('[data-mid]').forEach((btn) => {
       btn.addEventListener('click', () => {
         uiClick();
