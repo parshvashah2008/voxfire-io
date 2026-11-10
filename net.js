@@ -1155,7 +1155,7 @@ class RoomNet {
 
   interpChar(c, dt) {
     if (!c.netPos) return;
-    const f = Math.min(1, dt * 18);
+    const f = 1 - Math.exp(-18 * dt);
     if (c.pos.distanceTo(c.netPos) > 8) {
       c.pos.copy(c.netPos);
     } else {

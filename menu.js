@@ -546,6 +546,14 @@ document.querySelectorAll('#s-quality button[data-v]').forEach((btn) => {
   });
 });
 
+const fpsCapSel = $('s-fpscap');
+fpsCapSel.value = String(profile.settings.maxFps ?? 500);
+fpsCapSel.addEventListener('change', () => {
+  uiClick();
+  profile.settings.maxFps = Number(fpsCapSel.value);
+  saveProfile();
+});
+
 const fpsCheck = $('s-fps');
 fpsCheck.checked = Boolean(profile.settings.showFps);
 fpsCheck.addEventListener('change', () => {
@@ -737,7 +745,65 @@ $('btn-quit').onclick = () => {
   if (origQuit) origQuit();
 };
 
+let playFlow = null; // null | 'bots' | 'friends'
+
+function updatePlayLayout(st = net.getState()) {
+  if (st.role !== 'solo') {
+    playFlow = 'friends';
+  }
+  const choosing = playFlow === null;
+  $('play-choice').classList.toggle('hidden', !choosing);
+  $('play-flow-bar').classList.toggle('hidden', choosing);
+  $('friends-box').classList.toggle('hidden', playFlow !== 'friends');
+  $('friends-hint').classList.toggle('hidden', playFlow !== 'friends' || st.role !== 'solo');
+  $('play-setup').classList.toggle('hidden', choosing || (playFlow === 'friends' && st.role === 'solo'));
+
+  const lbl = $('play-flow-label');
+  lbl.textContent = playFlow === 'friends' ? 'VS FRIENDS' : 'VS BOTS';
+  lbl.classList.toggle('friends', playFlow === 'friends');
+  $('btn-switch-play').textContent = playFlow === 'friends' ? 'Switch to VS Bots' : 'Switch to VS Friends';
+}
+
+function setPlayFlow(next) {
+  if (next !== 'friends' && net.role !== 'solo') {
+    net.leaveRoom(true);
+  }
+  playFlow = next;
+  if (next === 'bots') {
+    botsInput.min = '1';
+    if (cfg.bots === 0) {
+      cfg.bots = 7;
+      botsInput.value = '7';
+      botsVal.textContent = '7';
+    }
+  } else if (next === 'friends') {
+    botsInput.min = '0';
+  }
+  updatePlayLayout(net.getState());
+}
+
+$('choose-bots').addEventListener('click', () => {
+  uiClick();
+  setPlayFlow('bots');
+});
+
+$('choose-friends').addEventListener('click', () => {
+  uiClick();
+  setPlayFlow('friends');
+});
+
+$('btn-back-choice').addEventListener('click', () => {
+  uiClick();
+  setPlayFlow(null);
+});
+
+$('btn-switch-play').addEventListener('click', () => {
+  uiClick();
+  setPlayFlow(playFlow === 'friends' ? 'bots' : 'friends');
+});
+
 function renderRoomState(st) {
+  updatePlayLayout(st);
   const inRoom = st.role !== 'solo';
   $('friends-idle').classList.toggle('hidden', inRoom);
   $('room-lobby').classList.toggle('hidden', !inRoom);
@@ -854,6 +920,7 @@ renderRoomState(net.getState());
 
 const urlRoom = new URLSearchParams(window.location.search).get('room');
 if (urlRoom) {
+  setPlayFlow('friends');
   $('room-join-input').value = urlRoom;
   net.joinRoom(urlRoom);
 }
