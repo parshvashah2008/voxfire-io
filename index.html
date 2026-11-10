@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VOXFIRE.io — Blocky Browser FPS</title>
+    <meta name="description" content="VOXFIRE.io is a fast blocky first-person shooter in your browser. 20 weapons, killstreaks, gun game, team deathmatch and smart bots." />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+    <script type="module" src="./index-cmkigcey.js"></script>
+    <script type="module" src="./menu.js"></script>
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+
+    <!-- ============================== MENU ============================== -->
+    <div id="menu">
+      <header class="menu-top">
+        <div class="logo">VOX<span>FIRE</span><small>.io</small></div>
+        <div class="player-chip">
+          <div class="lvl" id="chip-level">1</div>
+          <div class="chip-info">
+            <div class="chip-name" id="chip-name">Player</div>
+            <div class="xpbar"><i id="chip-xp"></i></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="menu-body">
+        <nav class="tabs">
+          <button class="tab active" data-tab="play">Play</button>
+          <button class="tab" data-tab="loadout">Loadout</button>
+          <button class="tab" data-tab="profile">Profile</button>
+          <button class="tab" data-tab="settings">Settings</button>
+          <button class="tab" data-tab="controls">Controls</button>
+        </nav>
+
+        <main class="panels">
+          <!-- PLAY -->
+          <section class="panel active" data-panel="play">
+            <h2>Game Mode</h2>
+            <div class="cards modes" id="modes"></div>
+            <h2>Arena</h2>
+            <div class="cards maps" id="maps"></div>
+            <div class="opts">
+              <label class="opt">
+                <span>Bots <b id="bots-val">7</b></span>
+                <input type="range" id="opt-bots" min="1" max="11" value="7" />
+              </label>
+              <div class="opt">
+                <span>Bot Skill</span>
+                <div class="seg" id="opt-diff"></div>
+              </div>
+              <label class="opt">
+                <span>Score Limit</span>
+                <select id="opt-score">
+                  <option value="15">15 kills</option>
+                  <option value="25" selected>25 kills</option>
+                  <option value="40">40 kills</option>
+                </select>
+              </label>
+              <label class="opt">
+                <span>Time Limit</span>
+                <select id="opt-time">
+                  <option value="300">5 min</option>
+                  <option value="480" selected>8 min</option>
+                  <option value="720">12 min</option>
+                </select>
+              </label>
+            </div>
+            <h2>Mutators</h2>
+            <div class="mutators" id="mutators"></div>
+            <div class="deploy-row">
+              <div class="loadout-mini" id="loadout-mini"></div>
+              <button class="deploy" id="deploy">Deploy <span>▶</span></button>
+            </div>
+          </section>
+
+          <!-- LOADOUT -->
+          <section class="panel" data-panel="loadout">
+            <div class="slot-tabs" id="slot-tabs">
+              <button data-slot="primary" class="active">Primary</button>
+              <button data-slot="secondary">Secondary</button>
+              <button data-slot="melee">Melee</button>
+            </div>
+            <div class="loadout-grid">
+              <div class="weapon-list" id="weapon-list"></div>
+              <div class="weapon-detail">
+                <canvas id="preview" width="520" height="260"></canvas>
+                <div class="wd-head">
+                  <h3 id="wd-name">AK-Kour</h3>
+                  <span class="badge" id="wd-tag">Assault Rifle</span>
+                </div>
+                <p id="wd-desc"></p>
+                <div class="stats" id="wd-stats"></div>
+                <div class="wd-meta" id="wd-meta"></div>
+                <h4>Camo</h4>
+                <div class="camos" id="camos"></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PROFILE -->
+          <section class="panel" data-panel="profile">
+            <h2>Callsign</h2>
+            <input id="name-input" maxlength="16" class="text-input" />
+            <h2>Career</h2>
+            <div class="career" id="career"></div>
+          </section>
+
+          <!-- SETTINGS -->
+          <section class="panel" data-panel="settings">
+            <div class="settings">
+              <label class="opt"><span>Mouse Sensitivity <b id="v-sens"></b></span><input type="range" id="s-sens" min="0.1" max="4" step="0.05" /></label>
+              <label class="opt"><span>ADS Sensitivity <b id="v-ads"></b></span><input type="range" id="s-ads" min="0.2" max="1.5" step="0.05" /></label>
+              <label class="opt"><span>Field of View <b id="v-fov"></b></span><input type="range" id="s-fov" min="70" max="115" step="1" /></label>
+              <label class="opt"><span>Volume <b id="v-vol"></b></span><input type="range" id="s-vol" min="0" max="1" step="0.05" /></label>
+              <div class="opt"><span>Crosshair Color</span><div class="swatches" id="s-xhair"></div></div>
+              <div class="opt"><span>Graphics</span><div class="seg" id="s-quality"><button data-v="low">Performance</button><button data-v="high">Quality</button></div></div>
+              <label class="opt check"><input type="checkbox" id="s-fps" /> <span>Show FPS</span></label>
+              <label class="opt check"><input type="checkbox" id="s-invert" /> <span>Invert Y axis</span></label>
+            </div>
+          </section>
+
+          <!-- CONTROLS -->
+          <section class="panel" data-panel="controls">
+            <div class="controls">
+              <div><kbd>W A S D</kbd><span>Move</span></div>
+              <div><kbd>Mouse</kbd><span>Aim</span></div>
+              <div><kbd>LMB</kbd><span>Fire</span></div>
+              <div><kbd>RMB</kbd><span>Aim down sights / scope</span></div>
+              <div><kbd>Wheel</kbd> / <kbd>Z</kbd><span>Zoom scope (while scoped)</span></div>
+              <div><kbd>Space</kbd><span>Jump</span></div>
+              <div><kbd>Shift</kbd><span>Sprint</span></div>
+              <div><kbd>C</kbd> / <kbd>Ctrl</kbd><span>Crouch · while sprinting: Slide</span></div>
+              <div><kbd>R</kbd><span>Reload</span></div>
+              <div><kbd>1 2 3</kbd> / <kbd>Wheel</kbd><span>Switch weapon</span></div>
+              <div><kbd>Q</kbd><span>Quick swap</span></div>
+              <div><kbd>G</kbd><span>Throw frag grenade</span></div>
+              <div><kbd>Tab</kbd><span>Scoreboard</span></div>
+              <div><kbd>Esc</kbd><span>Pause</span></div>
+            </div>
+            <div class="tips">
+              <h2>Field Notes</h2>
+              <ul>
+                <li><b>Killstreaks:</b> 3 kills = Radar, 5 = Overdrive, 7 = Airstrike, 12 = Orbital Strike.</li>
+                <li><b>Jump pads</b> glow on the ground next to tall buildings — use them to grab rooftops.</li>
+                <li><b>Rocket-jump</b> with the Bazooka: fire at your feet while jumping.</li>
+                <li><b>Pickups:</b> white crates heal 60 HP, yellow-striped crates refill ammo and grenades.</li>
+                <li><b>Gun Game:</b> a knife kill demotes your victim one level.</li>
+                <li>Every kill scavenges half a magazine of reserve ammo.</li>
+              </ul>
+            </div>
+          </section>
+        </main>
+      </div>
+      <footer class="menu-foot">Click Deploy to lock your mouse · Esc to pause</footer>
+    </div>
+
+    <!-- ============================== HUD ============================== -->
+    <div id="hud" class="hidden">
+      <div id="crosshair" data-mode="normal"><i class="l"></i><i class="r"></i><i class="t"></i><i class="b"></i><i class="dot"></i></div>
+      <div id="hitmarker"><i></i><i></i><i></i><i></i></div>
+      <div id="scope">
+        <div class="lens">
+          <svg class="reticle" viewBox="0 0 400 400" aria-hidden="true">
+            <line x1="0" y1="200" x2="188" y2="200" stroke="rgba(16,24,32,0.85)" stroke-width="0.9" />
+            <line x1="212" y1="200" x2="400" y2="200" stroke="rgba(16,24,32,0.85)" stroke-width="0.9" />
+            <line x1="200" y1="0" x2="200" y2="188" stroke="rgba(16,24,32,0.85)" stroke-width="0.9" />
+            <line x1="200" y1="212" x2="200" y2="400" stroke="rgba(16,24,32,0.85)" stroke-width="0.9" />
+            <line x1="0" y1="200" x2="112" y2="200" stroke="#080c12" stroke-width="4.2" />
+            <line x1="288" y1="200" x2="400" y2="200" stroke="#080c12" stroke-width="4.2" />
+            <line x1="200" y1="288" x2="200" y2="400" stroke="#080c12" stroke-width="4.2" />
+            <line x1="200" y1="188" x2="200" y2="212" stroke="rgba(255,60,78,0.65)" stroke-width="1" />
+            <line x1="188" y1="200" x2="212" y2="200" stroke="rgba(255,60,78,0.65)" stroke-width="1" />
+            <circle cx="200" cy="200" r="1.9" fill="#ff3b4e" />
+            <circle cx="200" cy="200" r="18" fill="none" stroke="rgba(16,24,32,0.55)" stroke-width="0.8" stroke-dasharray="3 4" />
+            <circle cx="146" cy="200" r="1.7" fill="#0d141d" />
+            <circle cx="164" cy="200" r="1.7" fill="#0d141d" />
+            <circle cx="182" cy="200" r="1.7" fill="#0d141d" />
+            <circle cx="218" cy="200" r="1.7" fill="#0d141d" />
+            <circle cx="236" cy="200" r="1.7" fill="#0d141d" />
+            <circle cx="254" cy="200" r="1.7" fill="#0d141d" />
+            <circle cx="200" cy="146" r="1.7" fill="#0d141d" />
+            <circle cx="200" cy="164" r="1.7" fill="#0d141d" />
+            <circle cx="200" cy="182" r="1.7" fill="#0d141d" />
+            <circle cx="200" cy="218" r="1.7" fill="#0d141d" />
+            <circle cx="200" cy="236" r="1.7" fill="#0d141d" />
+            <circle cx="200" cy="254" r="1.7" fill="#0d141d" />
+            <line x1="191" y1="236" x2="209" y2="236" stroke="#0d141d" stroke-width="1.3" />
+            <line x1="187" y1="254" x2="213" y2="254" stroke="#0d141d" stroke-width="1.3" />
+            <line x1="183" y1="272" x2="217" y2="272" stroke="#0d141d" stroke-width="1.3" />
+          </svg>
+          <div class="scope-hint">SCROLL / Z · ZOOM</div>
+          <div class="scope-tag scope-zoom">8.0×</div>
+          <div class="scope-tag scope-dist">--m</div>
+        </div>
+      </div>
+      <div id="vignette"></div>
+      <div id="dmg-flash"></div>
+      <div id="dmg-indicators"></div>
+      <div id="shield-note">SPAWN SHIELD</div>
+
+      <div id="topbar">
+        <div class="ts left" id="score-left">0</div>
+        <div class="ts mid"><div id="timer">8:00</div><div id="mode-sub"></div></div>
+        <div class="ts right" id="score-right">0</div>
+      </div>
+
+      <div id="killfeed"></div>
+      <canvas id="minimap" width="180" height="180"></canvas>
+      <div id="streaks"></div>
+
+      <div id="popup"></div>
+      <div id="announce"></div>
+      <div id="hint"></div>
+
+      <div id="vitals">
+        <div class="hp-label">HP <b id="hp-num">100</b></div>
+        <div class="hp-bar"><i id="hp-fill"></i></div>
+        <div id="grenades"></div>
+      </div>
+
+      <div id="weapon-box">
+        <div id="weapon-slots"></div>
+        <div class="ammo"><b id="ammo-mag">30</b><span id="ammo-res">/ 90</span></div>
+        <div id="weapon-name">AK-Kour</div>
+      </div>
+
+      <div id="scoreboard"></div>
+      <div id="death-screen">
+        <div class="ds-title">ELIMINATED</div>
+        <div id="death-killer"></div>
+        <div id="death-weapon"></div>
+        <div id="death-timer"></div>
+      </div>
+      <div id="fps"></div>
+    </div>
+
+    <!-- ============================== PAUSE / END ============================== -->
+    <div id="pause" class="overlay hidden">
+      <div class="dialog">
+        <h2>Paused</h2>
+        <button class="btn primary" id="btn-resume">Resume</button>
+        <button class="btn" id="btn-restart">Restart Match</button>
+        <button class="btn" id="btn-quit">Quit to Menu</button>
+        <p class="muted">Click Resume to recapture your mouse.</p>
+      </div>
+    </div>
+
+    <div id="end" class="overlay hidden">
+      <div class="dialog wide">
+        <div class="end-title" id="end-title">VICTORY</div>
+        <div class="end-place" id="end-place"></div>
+        <div class="end-stats" id="end-stats"></div>
+        <div class="end-xp">
+          <div class="end-xp-row"><span id="end-level">Level 1</span><b id="end-xpgain">+0 XP</b></div>
+          <div class="xpbar big"><i id="end-xpbar"></i></div>
+          <div id="end-unlock"></div>
+        </div>
+        <div class="end-board" id="end-board"></div>
+        <div class="end-actions">
+          <button class="btn primary" id="btn-again">Play Again</button>
+          <button class="btn" id="btn-menu">Main Menu</button>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>
