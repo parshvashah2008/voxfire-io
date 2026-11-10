@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <script type="module" src="./index-cmkigcey.js"></script>
     <script type="module" src="./menu.js"></script>
   </head>
@@ -41,6 +42,31 @@
         <main class="panels">
           <!-- PLAY -->
           <section class="panel active" data-panel="play">
+            <div class="friends-box" id="friends-box">
+              <div class="friends-idle" id="friends-idle">
+                <div class="friends-title">Play With Friends</div>
+                <div class="friends-actions">
+                  <button type="button" class="btn primary small" id="btn-host">Host Room</button>
+                  <div class="join-group">
+                    <input type="text" id="room-join-input" placeholder="Enter room code or invite link..." maxlength="140" />
+                    <button type="button" class="btn small" id="btn-join">Join</button>
+                  </div>
+                </div>
+              </div>
+              <div class="room-lobby hidden" id="room-lobby">
+                <div class="room-head">
+                  <div class="room-badge-wrap">
+                    <span class="room-label">ROOM CODE</span>
+                    <b class="room-code" id="room-code">------</b>
+                    <button type="button" class="copy-btn" id="btn-copy-code">Copy Code</button>
+                    <button type="button" class="copy-btn accent" id="btn-copy-link">Copy Invite Link</button>
+                  </div>
+                  <button type="button" class="copy-btn danger" id="btn-leave-room">Leave Room</button>
+                </div>
+                <div class="room-members" id="room-members"></div>
+              </div>
+              <div class="room-status" id="room-status"></div>
+            </div>
             <h2>Game Mode</h2>
             <div class="cards modes" id="modes"></div>
             <h2>Arena</h2>
@@ -48,7 +74,7 @@
             <div class="opts">
               <label class="opt">
                 <span>Bots <b id="bots-val">7</b></span>
-                <input type="range" id="opt-bots" min="1" max="11" value="7" />
+                <input type="range" id="opt-bots" min="0" max="11" value="7" />
               </label>
               <div class="opt">
                 <span>Bot Skill</span>
@@ -244,6 +270,10 @@
     <div id="pause" class="overlay hidden">
       <div class="dialog">
         <h2>Paused</h2>
+        <div class="pause-room hidden" id="pause-room">
+          <span>Room <b id="pause-room-code">------</b></span>
+          <button type="button" class="copy-btn accent" id="btn-pause-copy">Copy Invite Link</button>
+        </div>
         <button class="btn primary" id="btn-resume">Resume</button>
         <button class="btn" id="btn-restart">Restart Match</button>
         <button class="btn" id="btn-quit">Quit to Menu</button>

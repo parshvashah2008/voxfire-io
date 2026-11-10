@@ -1,4 +1,5 @@
 import './index-cmkigcey.js';
+import { net, getInviteUrl } from './net.js';
 
 const vf = window.__VOXFIRE__;
 if (!vf) {
@@ -115,9 +116,11 @@ function renderModes() {
 
   host.querySelectorAll('[data-mode]').forEach((btn) => {
     btn.addEventListener('click', () => {
+      if (net.role === 'client') return;
       uiClick();
       cfg.mode = btn.dataset.mode;
       renderModes();
+      if (net.role === 'host') net.broadcastLobby();
     });
   });
 }
@@ -138,10 +141,12 @@ function renderMaps() {
 
   host.querySelectorAll('[data-map]').forEach((btn) => {
     btn.addEventListener('click', () => {
+      if (net.role === 'client') return;
       uiClick();
       cfg.mapId = btn.dataset.map;
       renderMaps();
       game.loadMap(cfg.mapId);
+      if (net.role === 'host') net.broadcastLobby();
     });
   });
 }
@@ -156,9 +161,11 @@ function renderDiff() {
 
   host.querySelectorAll('[data-diff]').forEach((btn) => {
     btn.addEventListener('click', () => {
+      if (net.role === 'client') return;
       uiClick();
       cfg.difficulty = btn.dataset.diff;
       renderDiff();
+      if (net.role === 'host') net.broadcastLobby();
     });
   });
 }
@@ -173,10 +180,12 @@ function renderMutators() {
 
   host.querySelectorAll('[data-mut]').forEach((btn) => {
     btn.addEventListener('click', () => {
+      if (net.role === 'client') return;
       uiClick();
       const k = btn.dataset.mut;
       cfg.mutators[k] = !cfg.mutators[k];
       renderMutators();
+      if (net.role === 'host') net.broadcastLobby();
     });
   });
 }
@@ -209,22 +218,28 @@ const botsVal = $('bots-val');
 botsInput.value = String(cfg.bots);
 botsVal.textContent = String(cfg.bots);
 botsInput.addEventListener('input', () => {
+  if (net.role === 'client') return;
   cfg.bots = Number(botsInput.value);
   botsVal.textContent = String(cfg.bots);
+  if (net.role === 'host') net.broadcastLobby();
 });
 
 const scoreSel = $('opt-score');
 scoreSel.value = String(cfg.scoreLimit);
 scoreSel.addEventListener('change', () => {
+  if (net.role === 'client') return;
   uiClick();
   cfg.scoreLimit = Number(scoreSel.value);
+  if (net.role === 'host') net.broadcastLobby();
 });
 
 const timeSel = $('opt-time');
 timeSel.value = String(cfg.timeLimit);
 timeSel.addEventListener('change', () => {
+  if (net.role === 'client') return;
   uiClick();
   cfg.timeLimit = Number(timeSel.value);
+  if (net.role === 'host') net.broadcastLobby();
 });
 
 /* ============================== LOADOUT & 3D PREVIEW ============================== */
@@ -375,6 +390,7 @@ function renderWeaponList() {
       renderWeaponList();
       renderWeaponDetail();
       renderLoadoutMini();
+      net.sendClientProfile();
     });
   });
 }
@@ -408,6 +424,7 @@ function renderCamos() {
       renderCamos();
       renderWeaponPreview();
       renderLoadoutMini();
+      net.sendClientProfile();
     });
   });
 }
@@ -434,6 +451,7 @@ nameInput.addEventListener('input', () => {
     profile.name = val.slice(0, 16);
     renderPlayerChip();
     saveProfile();
+    net.sendClientProfile();
   }
 });
 nameInput.addEventListener('blur', () => {
@@ -613,8 +631,149 @@ game.onEnd = (res) => {
   renderPlayerChip();
   renderCareer();
   renderCamos();
+  $('btn-again').style.display = net.role === 'client' ? 'none' : '';
   $('end').classList.remove('hidden');
 };
+
+/* ============================== FRIENDS / ROOM LOBBY ============================== */
+
+function flashCopyBtn(btn, label) {
+  const prev = btn.textContent;
+  btn.textContent = label;
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = prev;
+    btn.disabled = false;
+  }, 1500);
+}
+
+async function copyText(text, btn, label = 'Copied!') {
+  try {
+    await navigator.clipboard.writeText(text);
+    flashCopyBtn(btn, label);
+  } catch {
+    const tmp = document.createElement('textarea');
+    tmp.value = text;
+    document.body.appendChild(tmp);
+    tmp.select();
+    document.execCommand('copy');
+    tmp.remove();
+    flashCopyBtn(btn, label);
+  }
+}
+
+$('btn-host').addEventListener('click', () => {
+  uiClick();
+  net.hostRoom();
+});
+
+function submitJoin() {
+  const input = $('room-join-input');
+  uiClick();
+  net.joinRoom(input.value);
+}
+
+$('btn-join').addEventListener('click', submitJoin);
+$('room-join-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    submitJoin();
+  }
+});
+
+$('btn-copy-code').addEventListener('click', () => {
+  if (!net.roomCode) return;
+  uiClick();
+  copyText(net.roomCode, $('btn-copy-code'));
+});
+
+$('btn-copy-link').addEventListener('click', () => {
+  if (!net.roomCode) return;
+  uiClick();
+  copyText(getInviteUrl(net.roomCode), $('btn-copy-link'));
+});
+
+$('btn-pause-copy').addEventListener('click', () => {
+  if (!net.roomCode) return;
+  uiClick();
+  copyText(getInviteUrl(net.roomCode), $('btn-pause-copy'));
+});
+
+$('btn-leave-room').addEventListener('click', () => {
+  uiClick();
+  net.leaveRoom();
+});
+
+const origQuit = $('btn-quit').onclick;
+$('btn-quit').onclick = () => {
+  if (net.role === 'client') {
+    net.leaveRoom();
+    return;
+  }
+  if (origQuit) origQuit();
+};
+
+function renderRoomState(st) {
+  const inRoom = st.role !== 'solo';
+  $('friends-idle').classList.toggle('hidden', inRoom);
+  $('room-lobby').classList.toggle('hidden', !inRoom);
+  $('pause-room').classList.toggle('hidden', !inRoom);
+  if (inRoom) {
+    $('room-code').textContent = st.roomCode;
+    $('pause-room-code').textContent = st.roomCode;
+  }
+
+  const statusEl = $('room-status');
+  statusEl.textContent = st.error || st.status || '';
+  statusEl.classList.toggle('err', Boolean(st.error));
+
+  const membersEl = $('room-members');
+  const isTdm = cfg.mode === 'tdm';
+  membersEl.innerHTML = (st.members || []).map((m) => `
+    <button type="button" class="member-pill ${m.isHost ? 'host' : ''} ${isTdm ? `team${m.team}` : ''}"
+      data-mid="${m.id}" ${st.role === 'host' && isTdm ? 'title="Click to swap team"' : ''}>
+      ${isTdm ? `<em>${m.team === 0 ? 'BLUE' : 'RED'}</em>` : ''}
+      <span>${esc(m.name)}</span>
+      ${m.isHost ? '<small>HOST</small>' : ''}
+    </button>
+  `).join('');
+
+  if (st.role === 'host' && isTdm) {
+    membersEl.querySelectorAll('[data-mid]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        uiClick();
+        net.swapMemberTeam(Number(btn.dataset.mid));
+      });
+    });
+  }
+
+  const isClient = st.role === 'client';
+  botsInput.value = String(cfg.bots);
+  botsVal.textContent = String(cfg.bots);
+  scoreSel.value = String(cfg.scoreLimit);
+  timeSel.value = String(cfg.timeLimit);
+  botsInput.disabled = isClient;
+  scoreSel.disabled = isClient;
+  timeSel.disabled = isClient;
+
+  $('modes').classList.toggle('play-locked', isClient);
+  $('maps').classList.toggle('play-locked', isClient);
+  $('opt-diff').classList.toggle('play-locked', isClient);
+  $('mutators').classList.toggle('play-locked', isClient);
+
+  const deployBtn = $('deploy');
+  deployBtn.disabled = isClient;
+  deployBtn.innerHTML = isClient ? 'Waiting for Host…' : 'Deploy <span>▶</span>';
+  $('btn-restart').style.display = isClient ? 'none' : '';
+  $('btn-quit').textContent = isClient ? 'Leave Match' : 'Quit to Menu';
+
+  renderModes();
+  renderMaps();
+  renderDiff();
+  renderMutators();
+}
+
+net.onChange(renderRoomState);
 
 window.addEventListener('resize', () => {
   if (activeTab === 'loadout' && previewState) {
@@ -636,3 +795,10 @@ renderCamos();
 renderCareer();
 renderCrosshairSwatches();
 renderQualityButtons();
+renderRoomState(net.getState());
+
+const urlRoom = new URLSearchParams(window.location.search).get('room');
+if (urlRoom) {
+  $('room-join-input').value = urlRoom;
+  net.joinRoom(urlRoom);
+}
