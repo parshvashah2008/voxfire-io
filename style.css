@@ -104,6 +104,32 @@ button, input, select {
   border-radius: 12px;
   padding: 8px 14px;
   min-width: 210px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.player-chip:hover {
+  border-color: var(--cyan);
+  background: rgba(20, 29, 44, 0.92);
+}
+
+.chip-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.chip-edit {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(76, 212, 255, 0.14);
+  color: var(--cyan);
+  flex-shrink: 0;
 }
 
 .player-chip .lvl {
@@ -2132,4 +2158,29 @@ tr.dead {
   .sb-teams {
     grid-template-columns: 1fr;
   }
+}
+
+#tag-modal {
+  z-index: 40;
+}
+
+.tag-dialog {
+  max-width: 400px;
+  gap: 12px;
+}
+
+.tag-dialog .choice-badge {
+  align-self: center;
+}
+
+.tag-input {
+  width: 100%;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.tag-input:focus {
+  border-color: var(--cyan);
 }

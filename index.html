@@ -21,13 +21,16 @@
     <div id="menu">
       <header class="menu-top">
         <div class="logo">VOX<span>FIRE</span><small>.io</small></div>
-        <div class="player-chip">
+        <button type="button" class="player-chip" id="chip-tag-btn" title="Click to change Player Tag">
           <div class="lvl" id="chip-level">1</div>
           <div class="chip-info">
-            <div class="chip-name" id="chip-name">Player</div>
+            <div class="chip-name-row">
+              <div class="chip-name" id="chip-name">Player</div>
+              <small class="chip-edit">TAG</small>
+            </div>
             <div class="xpbar"><i id="chip-xp"></i></div>
           </div>
-        </div>
+        </button>
       </header>
 
       <div class="menu-body">
@@ -347,6 +350,17 @@
           <button class="btn" id="btn-menu">Main Menu</button>
         </div>
       </div>
+    </div>
+
+    <div id="tag-modal" class="overlay">
+      <form class="dialog tag-dialog" id="tag-form" autocomplete="off">
+        <span class="choice-badge">VOXFIRE CALLSIGN</span>
+        <h2>Enter Player Tag</h2>
+        <p class="muted" id="tag-subtitle">Your username shown in-game, in rooms, killfeed, and scoreboards.</p>
+        <input type="text" id="tag-input" class="text-input tag-input" placeholder="Enter your username..." maxlength="16" required />
+        <div class="room-status err hidden" id="tag-err"></div>
+        <button type="submit" class="btn primary" id="btn-tag-save">Continue ▶</button>
+      </form>
     </div>
 
   </body>

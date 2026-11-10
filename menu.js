@@ -77,6 +77,21 @@ function renderPlayerChip() {
   $('chip-xp').style.width = `${pct.toFixed(1)}%`;
 }
 
+function applyPlayerName(raw, syncProfileInput = true) {
+  const clean = String(raw || '').trim().replace(/\s+/g, ' ').slice(0, 16);
+  if (!clean) return false;
+  profile.name = clean;
+  if (game.player) game.player.name = clean;
+  if (syncProfileInput) {
+    const ni = $('name-input');
+    if (ni) ni.value = clean;
+  }
+  renderPlayerChip();
+  saveProfile();
+  net.sendClientProfile();
+  return true;
+}
+
 /* ============================== TABS ============================== */
 
 let activeTab = 'play';
@@ -452,13 +467,7 @@ document.querySelectorAll('#slot-tabs button[data-slot]').forEach((btn) => {
 const nameInput = $('name-input');
 nameInput.value = profile.name;
 nameInput.addEventListener('input', () => {
-  const val = nameInput.value.trim();
-  if (val) {
-    profile.name = val.slice(0, 16);
-    renderPlayerChip();
-    saveProfile();
-    net.sendClientProfile();
-  }
+  applyPlayerName(nameInput.value, false);
 });
 nameInput.addEventListener('blur', () => {
   if (!nameInput.value.trim()) {
@@ -919,8 +928,50 @@ renderQualityButtons();
 renderRoomState(net.getState());
 
 const urlRoom = new URLSearchParams(window.location.search).get('room');
-if (urlRoom) {
-  setPlayFlow('friends');
-  $('room-join-input').value = urlRoom;
-  net.joinRoom(urlRoom);
+let pendingUrlRoom = urlRoom ? urlRoom.trim() : '';
+
+function openTagPrompt(inviteCode = '') {
+  const modal = $('tag-modal');
+  const input = $('tag-input');
+  const errEl = $('tag-err');
+  errEl.classList.add('hidden');
+  errEl.textContent = '';
+  $('tag-subtitle').textContent = inviteCode
+    ? `Joining room ${inviteCode.toUpperCase()} — enter your player tag first.`
+    : 'Your username shown in-game, in rooms, killfeed, and scoreboards.';
+  input.value = profile.name;
+  modal.classList.remove('hidden');
+  setTimeout(() => {
+    input.focus();
+    input.select();
+  }, 0);
 }
+
+$('chip-tag-btn').addEventListener('click', () => {
+  uiClick();
+  openTagPrompt('');
+});
+
+$('tag-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const input = $('tag-input');
+  const errEl = $('tag-err');
+  if (!applyPlayerName(input.value, true)) {
+    errEl.textContent = 'Please enter a player tag.';
+    errEl.classList.remove('hidden');
+    input.focus();
+    return;
+  }
+  uiClick();
+  errEl.classList.add('hidden');
+  $('tag-modal').classList.add('hidden');
+  if (pendingUrlRoom) {
+    const code = pendingUrlRoom;
+    pendingUrlRoom = '';
+    setPlayFlow('friends');
+    $('room-join-input').value = code;
+    net.joinRoom(code);
+  }
+});
+
+openTagPrompt(pendingUrlRoom);
