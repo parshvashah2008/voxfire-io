@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>VOXFIRE.io — Blocky Browser FPS</title>
     <meta name="description" content="VOXFIRE.io is a fast blocky first-person shooter in your browser. 20 weapons, killstreaks, gun game, team deathmatch and smart bots." />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
@@ -198,6 +198,7 @@
                   <option value="60">60 FPS</option>
                 </select>
               </label>
+              <div class="opt"><span>Touch Controls</span><div class="seg" id="s-touch"><button data-v="auto">Auto</button><button data-v="on">On</button><button data-v="off">Off</button></div></div>
               <label class="opt check"><input type="checkbox" id="s-fps" /> <span>Show FPS</span></label>
               <label class="opt check"><input type="checkbox" id="s-invert" /> <span>Invert Y axis</span></label>
             </div>
@@ -222,6 +223,15 @@
               <div><kbd>Esc</kbd><span>Pause</span></div>
             </div>
             <div class="tips">
+              <h2>Mobile Touch Controls</h2>
+              <ul>
+                <li><b>Left Thumb:</b> Drag joystick to move (push full forward to auto-sprint, or tap <b>RUN</b>).</li>
+                <li><b>Right Side:</b> Drag anywhere on the right screen (or while holding Fire) to aim.</li>
+                <li><b>Buttons:</b> Tap <b>ADS</b> to toggle sights/scope, <b>SLD</b> to crouch/slide, weapon pills to switch.</li>
+                <li><b>Top Bar / Score:</b> Tap the score bar or top-right scoreboard button to view standings; tap <b>☰</b> to pause.</li>
+              </ul>
+            </div>
+            <div class="tips">
               <h2>Field Notes</h2>
               <ul>
                 <li><b>Killstreaks:</b> 3 kills = Radar, 5 = Overdrive, 7 = Airstrike, 12 = Orbital Strike.</li>
@@ -235,7 +245,7 @@
           </section>
         </main>
       </div>
-      <footer class="menu-foot">Click Deploy to lock your mouse · Esc to pause</footer>
+      <footer class="menu-foot">Click Deploy to start · Esc or ☰ to pause · Touch controls on mobile</footer>
     </div>
 
     <!-- ============================== HUD ============================== -->
@@ -316,6 +326,46 @@
         <div id="death-timer"></div>
       </div>
       <div id="fps"></div>
+
+      <!-- ============================== MOBILE TOUCH CONTROLS ============================== -->
+      <div id="touch-controls">
+        <div id="joystick-zone" class="touch-zone" aria-label="Move joystick">
+          <div id="joystick-base"></div>
+          <div id="joystick-knob"></div>
+        </div>
+
+        <div id="look-zone" class="touch-zone" aria-label="Look and aim"></div>
+
+        <button type="button" id="btn-fire" class="tc-btn fire" aria-label="Fire">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M12 1v5M12 18v5M1 12h5M18 12h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <button type="button" id="btn-ads" class="tc-btn ads" aria-label="Aim down sights">
+          <span>ADS</span>
+        </button>
+        <button type="button" id="btn-jump" class="tc-btn jump" aria-label="Jump">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5l-7 7h4.5v7h5v-7H19z" fill="currentColor"/></svg>
+        </button>
+        <button type="button" id="btn-crouch" class="tc-btn crouch" aria-label="Crouch or slide">
+          <span>SLD</span>
+        </button>
+        <button type="button" id="btn-reload" class="tc-btn reload" aria-label="Reload">
+          <span>R</span>
+        </button>
+        <button type="button" id="btn-grenade" class="tc-btn grenade" aria-label="Throw grenade">
+          <span>FRAG</span>
+        </button>
+        <button type="button" id="btn-swap" class="tc-btn swap" aria-label="Swap weapon">
+          <span>⇄</span>
+        </button>
+        <button type="button" id="btn-sprint" class="tc-btn sprint" aria-label="Auto sprint">
+          <span>RUN</span>
+        </button>
+        <button type="button" id="btn-scope-zoom" class="tc-btn scope-zoom-btn hidden" aria-label="Cycle scope zoom">8×</button>
+        <button type="button" id="btn-score-m" class="tc-btn mscore" aria-label="Scoreboard">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        </button>
+        <button type="button" id="btn-pause-m" class="tc-btn mpause" aria-label="Pause">☰</button>
+      </div>
     </div>
 
     <!-- ============================== PAUSE / END ============================== -->
@@ -329,7 +379,7 @@
         <button class="btn primary" id="btn-resume">Resume</button>
         <button class="btn" id="btn-restart">Restart Match</button>
         <button class="btn" id="btn-quit">Quit to Menu</button>
-        <p class="muted">Click Resume to recapture your mouse.</p>
+        <p class="muted" id="pause-hint">Click Resume to recapture your mouse.</p>
       </div>
     </div>
 

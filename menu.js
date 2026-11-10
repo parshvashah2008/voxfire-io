@@ -1,5 +1,6 @@
 import './index-cmkigcey.js';
 import { net, getInviteUrl } from './net.js';
+import { createTouchController } from './touch.js';
 
 const vf = window.__VOXFIRE__;
 if (!vf) {
@@ -563,6 +564,25 @@ fpsCapSel.addEventListener('change', () => {
   saveProfile();
 });
 
+const touchCtrl = createTouchController(game, profile, sound);
+
+function renderTouchButtons() {
+  const mode = profile.settings.touchControls || 'auto';
+  document.querySelectorAll('#s-touch button[data-v]').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.v === mode);
+  });
+}
+
+document.querySelectorAll('#s-touch button[data-v]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    uiClick();
+    profile.settings.touchControls = btn.dataset.v;
+    saveProfile();
+    renderTouchButtons();
+    touchCtrl.syncTouchMode();
+  });
+});
+
 const fpsCheck = $('s-fps');
 fpsCheck.checked = Boolean(profile.settings.showFps);
 fpsCheck.addEventListener('change', () => {
@@ -925,6 +945,8 @@ renderCamos();
 renderCareer();
 renderCrosshairSwatches();
 renderQualityButtons();
+renderTouchButtons();
+touchCtrl.init();
 renderRoomState(net.getState());
 
 const urlRoom = new URLSearchParams(window.location.search).get('room');
