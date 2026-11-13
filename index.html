@@ -196,17 +196,17 @@
               <div class="opt"><span>Graphics</span><div class="seg" id="s-quality"><button data-v="ultra">500 FPS Boost</button><button data-v="low">Performance</button><button data-v="high">Quality</button></div></div>
               <label class="opt"><span>Max FPS</span>
                 <select id="s-fpscap">
-                  <option value="500">500 FPS</option>
-                  <option value="0">Unlimited (500Hz+)</option>
-                  <option value="360">360 FPS</option>
-                  <option value="240">240 FPS</option>
-                  <option value="144">144 FPS</option>
-                  <option value="120">120 FPS</option>
+                  <option value="120" selected>120 FPS (High Refresh / Mobile)</option>
                   <option value="60">60 FPS</option>
+                  <option value="500">500 FPS (Uncapped)</option>
+                  <option value="144">144 FPS</option>
+                  <option value="240">240 FPS</option>
+                  <option value="360">360 FPS</option>
+                  <option value="0">Unlimited</option>
                 </select>
               </label>
               <div class="opt"><span>Touch Controls</span><div class="seg" id="s-touch"><button data-v="auto">Auto</button><button data-v="on">On</button><button data-v="off">Off</button></div></div>
-              <label class="opt check hidden" id="s-autofire-row"><input type="checkbox" id="s-autofire" /> <span>Auto-Fire (Mobile &amp; Tablet)</span></label>
+              <label class="opt check hidden" id="s-autofire-row"><input type="checkbox" id="s-autofire" checked disabled /> <span>Auto-Fire: Always On (Mobile &amp; Tablet)</span></label>
               <label class="opt check"><input type="checkbox" id="s-fps" /> <span>Show FPS</span></label>
               <label class="opt check"><input type="checkbox" id="s-invert" /> <span>Invert Y axis</span></label>
             </div>
@@ -234,8 +234,8 @@
               <h2>Mobile Touch Controls</h2>
               <ul>
                 <li><b>Left Thumb:</b> Drag joystick to move (push full forward to auto-sprint, or tap <b>RUN</b>).</li>
-                <li><b>Right Side:</b> Drag anywhere on the right screen (or while holding Fire) to aim.</li>
-                <li><b>Auto-Fire (Mobile &amp; Tablet):</b> Automatically fires when aiming directly at an enemy (tap <b>AUTO</b> pill to toggle).</li>
+                <li><b>Right Side:</b> Drag anywhere on the right screen to aim — weapon automatically fires when your crosshair comes over an enemy!</li>
+                <li><b>Pure Auto-Fire:</b> No manual fire button needed on phones and tablets. The weapon fires automatically at up to 120Hz refresh rates.</li>
                 <li><b>Buttons:</b> Tap <b>ADS</b> to toggle sights/scope, <b>SLD</b> to crouch/slide, weapon pills to switch.</li>
                 <li><b>Top Bar / Score:</b> Tap the score bar or top-right scoreboard button to view standings; tap <b>☰</b> to pause.</li>
               </ul>

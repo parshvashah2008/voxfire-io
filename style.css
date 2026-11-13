@@ -2232,6 +2232,22 @@ body.touch-ui:not(.game-paused) #touch-controls {
   z-index: 1;
 }
 
+body.touch-ui #btn-fire,
+body.touch-ui #btn-autofire {
+  display: none !important;
+}
+
+body.auto-firing #crosshair i {
+  background: #ff3838 !important;
+  box-shadow: 0 0 10px rgba(255, 56, 56, 0.95) !important;
+}
+
+body.auto-firing #crosshair .dot {
+  background: #ff3838 !important;
+  box-shadow: 0 0 12px rgba(255, 56, 56, 1) !important;
+  transform: scale(1.4);
+}
+
 #joystick-base {
   position: absolute;
   left: calc(env(safe-area-inset-left, 0px) + 74px);

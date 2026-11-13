@@ -600,7 +600,10 @@ document.querySelectorAll('#s-quality button[data-v]').forEach((btn) => {
 });
 
 const fpsCapSel = $('s-fpscap');
-fpsCapSel.value = String(profile.settings.maxFps ?? 500);
+if (game.isMobileDevice && (!profile.settings.maxFps || profile.settings.maxFps === 500)) {
+  profile.settings.maxFps = 120;
+}
+fpsCapSel.value = String(profile.settings.maxFps ?? 120);
 fpsCapSel.addEventListener('change', () => {
   uiClick();
   profile.settings.maxFps = Number(fpsCapSel.value);
@@ -613,12 +616,8 @@ const autoFireRow = $('s-autofire-row');
 const autoFireCheck = $('s-autofire');
 if (autoFireRow && autoFireCheck) {
   autoFireRow.classList.toggle('hidden', !game.isMobileDevice);
-  autoFireCheck.checked = profile.settings.autoFire !== false;
-  autoFireCheck.addEventListener('change', () => {
-    uiClick();
-    profile.settings.autoFire = autoFireCheck.checked;
-    saveProfile();
-  });
+  profile.settings.autoFire = true;
+  autoFireCheck.checked = true;
 }
 
 function renderTouchButtons() {

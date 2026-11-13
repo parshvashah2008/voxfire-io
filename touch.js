@@ -10,13 +10,14 @@ const SPRINT_Y_THRESHOLD = -0.78;
 const TOUCH_LOOK_SCALE = 3.2;
 
 function isCoarseHardware() {
-  const uaMobile = /Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent);
+  const ua = navigator.userAgent || '';
+  const uaMobile = /Android|iPhone|iPad|iPod|Mobile|Tablet|Silk|Kindle|PlayBook|Mobi/i.test(ua);
+  const isIPad = navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
   const coarse = Boolean(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
-  const fine = Boolean(window.matchMedia && window.matchMedia('(pointer: fine)').matches);
-  const compactTouch = !fine
-    && ('ontouchstart' in window || navigator.maxTouchPoints > 0)
-    && Math.min(window.innerWidth, window.innerHeight) <= 900;
-  return uaMobile || coarse || compactTouch;
+  const touchPoints = Boolean('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  const isDesktop = (/Windows NT|CrOS|X11|Linux x86_64/i.test(ua) && !/Android/i.test(ua)) || (/Macintosh/i.test(ua) && !isIPad);
+  if (isDesktop && !uaMobile && !isIPad) return false;
+  return uaMobile || isIPad || coarse || touchPoints;
 }
 
 /**
@@ -46,9 +47,13 @@ export function createTouchController(game, profile, saveProfile, sound) {
         ? 'Tap Resume to continue.'
         : 'Click Resume to recapture your mouse.';
     }
+    const fireBtn = el('btn-fire');
+    if (fireBtn) {
+      fireBtn.classList.toggle('hidden', active);
+    }
     const autoBtn = el('btn-autofire');
     if (autoBtn) {
-      autoBtn.classList.toggle('hidden', !(game.isMobileDevice && active));
+      autoBtn.classList.add('hidden');
     }
     return active;
   }
@@ -377,10 +382,13 @@ export function createTouchController(game, profile, saveProfile, sound) {
     }
     const adsBtn = el('btn-ads');
     const sprintBtn = el('btn-sprint');
+    const fireBtn = el('btn-fire');
     const autoFireBtn = el('btn-autofire');
     const scoreBtn = el('btn-score-m');
     const zoomBtn = el('btn-scope-zoom');
 
+    if (fireBtn) fireBtn.classList.add('hidden');
+    if (autoFireBtn) autoFireBtn.classList.add('hidden');
     if (adsBtn) adsBtn.classList.toggle('active', Boolean(game.touch.ads));
     if (sprintBtn) sprintBtn.classList.toggle('active', sprintLocked);
     if (autoFireBtn) {
