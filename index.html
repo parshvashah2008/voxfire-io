@@ -109,6 +109,13 @@
             <div class="play-setup hidden" id="play-setup">
               <h2>Game Mode</h2>
               <div class="cards modes" id="modes"></div>
+              <div class="opt-team-section hidden" id="menu-team-row">
+                <h2>Choose Side</h2>
+                <div class="seg team-seg" id="menu-team-seg">
+                  <button type="button" data-team="0" class="team-btn-at active">🛡️ Anti-Terrorists</button>
+                  <button type="button" data-team="1" class="team-btn-t">⚔️ Terrorists</button>
+                </div>
+              </div>
               <h2>Arena</h2>
               <div class="cards maps" id="maps"></div>
               <div class="opts">
@@ -416,6 +423,69 @@
         <div class="room-status err hidden" id="tag-err"></div>
         <button type="submit" class="btn primary" id="btn-tag-save">Continue ▶</button>
       </form>
+    </div>
+
+    <!-- ============================== PRE-MATCH COOLDOWN / TEAM SELECTION ============================== -->
+    <div id="prematch-cooldown" class="overlay hidden">
+      <div class="dialog cooldown-dialog">
+        <div class="cd-header">
+          <div class="cd-mode-badge" id="cd-mode-title">4v4 TERRORISTS VS ANTI-TERRORISTS</div>
+          <div class="cd-timer-wrap">
+            <span class="cd-timer-count" id="cd-timer-count">5</span>
+            <span class="cd-timer-sub">COOLDOWN</span>
+          </div>
+          <div class="cd-progress-bar"><div class="cd-progress-fill" id="cd-progress-fill"></div></div>
+          <p class="muted cd-subtitle">Choose your squad before deployment:</p>
+        </div>
+
+        <div class="cd-teams-grid">
+          <!-- Anti-Terrorists Card -->
+          <div class="cd-team-card cd-team-at active" id="cd-card-at" data-team="0">
+            <div class="cd-team-top">
+              <span class="cd-team-icon">🛡️</span>
+              <div class="cd-team-meta">
+                <h3 id="cd-title-at">ANTI-TERRORISTS</h3>
+                <span class="cd-team-badge at" id="cd-badge-at">DEFENDERS</span>
+              </div>
+              <span class="cd-team-check">✓</span>
+            </div>
+            <div class="cd-team-weapons" id="cd-weapons-at">
+              <span class="cd-weapon-tag">M4</span>
+              <span class="cd-weapon-tag">TRI-BURST</span>
+              <span class="cd-weapon-tag">DMR</span>
+              <span class="cd-weapon-tag">P9</span>
+            </div>
+            <div class="cd-team-roster" id="cd-roster-at"></div>
+            <button type="button" class="btn cd-team-btn" id="cd-btn-at">✓ SELECTED (YOU)</button>
+          </div>
+
+          <!-- Terrorists Card -->
+          <div class="cd-team-card cd-team-t" id="cd-card-t" data-team="1">
+            <div class="cd-team-top">
+              <span class="cd-team-icon">⚔️</span>
+              <div class="cd-team-meta">
+                <h3 id="cd-title-t">TERRORISTS</h3>
+                <span class="cd-team-badge t" id="cd-badge-t">ATTACKERS</span>
+              </div>
+              <span class="cd-team-check">✓</span>
+            </div>
+            <div class="cd-team-weapons" id="cd-weapons-t">
+              <span class="cd-weapon-tag">AK-47</span>
+              <span class="cd-weapon-tag">BREACHER</span>
+              <span class="cd-weapon-tag">HAMMER</span>
+              <span class="cd-weapon-tag">DEAGLE</span>
+            </div>
+            <div class="cd-team-roster" id="cd-roster-t"></div>
+            <button type="button" class="btn cd-team-btn" id="cd-btn-t">JOIN TERRORISTS</button>
+          </div>
+        </div>
+
+        <div class="cd-footer">
+          <button type="button" class="btn primary cd-deploy-btn" id="cd-btn-deploy">DEPLOY NOW <span>▶</span></button>
+          <button type="button" class="btn cd-cancel-btn" id="cd-btn-cancel">Back to Menu</button>
+        </div>
+        <div class="cd-hint">Tip: Tap a team to switch sides anytime during cooldown. Press 1 for AT, 2 for T, Space to Deploy.</div>
+      </div>
     </div>
 
   </body>

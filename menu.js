@@ -142,7 +142,50 @@ function renderModes() {
         botsVal.textContent = '7';
       }
       renderModes();
+      renderTeamSelector();
       if (net.role === 'host') net.broadcastLobby();
+    });
+  });
+}
+
+cfg.team = cfg.team !== undefined ? Number(cfg.team) : 0;
+
+function renderTeamSelector() {
+  const row = $('menu-team-row');
+  if (!row) return;
+  const isTeam = cfg.mode === 'tva' || cfg.mode === 'tdm';
+  row.classList.toggle('hidden', !isTeam);
+  if (!isTeam) return;
+
+  const seg = $('menu-team-seg');
+  if (!seg) return;
+  const atBtn = seg.querySelector('.team-btn-at');
+  const tBtn = seg.querySelector('.team-btn-t');
+
+  if (atBtn && tBtn) {
+    if (cfg.mode === 'tdm') {
+      atBtn.innerHTML = '🛡️ Anti-Terrorists (Blue)';
+      tBtn.innerHTML = '⚔️ Terrorists (Red)';
+    } else {
+      atBtn.innerHTML = '🛡️ Anti-Terrorists';
+      tBtn.innerHTML = '⚔️ Terrorists';
+    }
+    atBtn.classList.toggle('active', cfg.team === 0);
+    tBtn.classList.toggle('active', cfg.team === 1);
+  }
+}
+
+const menuTeamSeg = $('menu-team-seg');
+if (menuTeamSeg) {
+  menuTeamSeg.querySelectorAll('button[data-team]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      uiClick();
+      cfg.team = Number(btn.dataset.team);
+      if (net.role === 'host') {
+        net.hostTeam = cfg.team;
+        net.broadcastLobby();
+      }
+      renderTeamSelector();
     });
   });
 }
@@ -930,6 +973,7 @@ function renderRoomState(st) {
   $('btn-quit').textContent = isClient ? 'Leave Match' : 'Quit to Menu';
 
   renderModes();
+  renderTeamSelector();
   renderMaps();
   renderDiff();
   renderMutators();
@@ -943,10 +987,245 @@ window.addEventListener('resize', () => {
   }
 });
 
+/* ============================== PRE-MATCH COOLDOWN & TEAM SELECTION ============================== */
+
+let cooldownTimer = null;
+let cooldownSecondsLeft = 5;
+
+function renderCooldownRoster() {
+  const atHost = $('cd-roster-at');
+  const tHost = $('cd-roster-t');
+  if (!atHost || !tHost) return;
+
+  const playerName = profile.name || 'You';
+  const isAT = cfg.team === 0;
+
+  // 4v4 roster for Anti-Terrorists (Blue)
+  let atHtml = '';
+  if (isAT) {
+    atHtml += `<div class="cd-slot you"><span class="slot-tag">YOU</span> <b>${esc(playerName)}</b> <small class="slot-role">Player</small></div>`;
+    atHtml += `<div class="cd-slot bot"><span class="slot-tag bot">BOT</span> <b>AI Teammate (Echo)</b></div>`;
+    atHtml += `<div class="cd-slot bot"><span class="slot-tag bot">BOT</span> <b>AI Teammate (Delta)</b></div>`;
+    atHtml += `<div class="cd-slot bot"><span class="slot-tag bot">BOT</span> <b>AI Teammate (Bravo)</b></div>`;
+  } else {
+    atHtml += `<div class="cd-slot bot"><span class="slot-tag bot">BOT</span> <b>AI Opponent (Alpha)</b></div>`;
+    atHtml += `<div class="cd-slot bot"><span class="slot-tag bot">BOT</span> <b>AI Opponent (Echo)</b></div>`;
+    atHtml += `<div class="cd-slot bot"><span class="slot-tag bot">BOT</span> <b>AI Opponent (Delta)</b></div>`;
+    atHtml += `<div class="cd-slot bot"><span class="slot-tag bot">BOT</span> <b>AI Opponent (Bravo)</b></div>`;
+  }
+  atHost.innerHTML = atHtml;
+
+  // 4v4 roster for Terrorists (Red)
+  let tHtml = '';
+  if (!isAT) {
+    tHtml += `<div class="cd-slot you"><span class="slot-tag you-t">YOU</span> <b>${esc(playerName)}</b> <small class="slot-role">Player</small></div>`;
+    tHtml += `<div class="cd-slot bot"><span class="slot-tag bot">BOT</span> <b>AI Teammate (Reaper)</b></div>`;
+    tHtml += `<div class="cd-slot bot"><span class="slot-tag bot">BOT</span> <b>AI Teammate (Ghost)</b></div>`;
+    tHtml += `<div class="cd-slot bot"><span class="slot-tag bot">BOT</span> <b>AI Teammate (Viper)</b></div>`;
+  } else {
+    tHtml += `<div class="cd-slot bot"><span class="slot-tag bot">BOT</span> <b>AI Opponent (Havoc)</b></div>`;
+    tHtml += `<div class="cd-slot bot"><span class="slot-tag bot">BOT</span> <b>AI Opponent (Reaper)</b></div>`;
+    tHtml += `<div class="cd-slot bot"><span class="slot-tag bot">BOT</span> <b>AI Opponent (Ghost)</b></div>`;
+    tHtml += `<div class="cd-slot bot"><span class="slot-tag bot">BOT</span> <b>AI Opponent (Viper)</b></div>`;
+  }
+  tHost.innerHTML = tHtml;
+}
+
+function renderCooldownView() {
+  const titleEl = $('cd-mode-title');
+  const atTitle = $('cd-title-at');
+  const tTitle = $('cd-title-t');
+  const atBadge = $('cd-badge-at');
+  const tBadge = $('cd-badge-t');
+  const atCard = $('cd-card-at');
+  const tCard = $('cd-card-t');
+  const atBtn = $('cd-btn-at');
+  const tBtn = $('cd-btn-t');
+
+  if (titleEl) {
+    titleEl.textContent = cfg.mode === 'tva'
+      ? '4v4 TERRORISTS VS ANTI-TERRORISTS'
+      : '4v4 TEAM DEATHMATCH';
+  }
+
+  if (cfg.mode === 'tdm') {
+    if (atTitle) atTitle.textContent = 'BLUE SQUAD';
+    if (atBadge) atBadge.textContent = 'ANTI-TERRORISTS';
+    if (tTitle) tTitle.textContent = 'RED SQUAD';
+    if (tBadge) tBadge.textContent = 'TERRORISTS';
+  } else {
+    if (atTitle) atTitle.textContent = 'ANTI-TERRORISTS';
+    if (atBadge) atBadge.textContent = 'DEFENDERS';
+    if (tTitle) tTitle.textContent = 'TERRORISTS';
+    if (tBadge) tBadge.textContent = 'ATTACKERS';
+  }
+
+  const isAT = cfg.team === 0;
+  if (atCard) atCard.classList.toggle('active', isAT);
+  if (tCard) tCard.classList.toggle('active', !isAT);
+
+  if (atBtn) atBtn.textContent = isAT ? '✓ SELECTED (YOU)' : 'JOIN ANTI-TERRORISTS';
+  if (tBtn) tBtn.textContent = !isAT ? '✓ SELECTED (YOU)' : 'JOIN TERRORISTS';
+
+  renderCooldownRoster();
+}
+
+function launchGame() {
+  if (cooldownTimer) {
+    clearInterval(cooldownTimer);
+    cooldownTimer = null;
+  }
+  const cooldownModal = $('prematch-cooldown');
+  if (cooldownModal) cooldownModal.classList.add('hidden');
+  $('menu').style.display = 'none';
+  $('end').classList.add('hidden');
+  $('pause').classList.add('hidden');
+  game.start(cfg);
+}
+
+function selectTeam(teamId) {
+  cfg.team = teamId;
+  if (net.role === 'host') {
+    net.hostTeam = cfg.team;
+    net.broadcastLobby();
+  }
+  sound.ensure();
+  sound.ui();
+  renderTeamSelector();
+  renderCooldownView();
+}
+
+function startPrematchCooldown() {
+  $('menu').style.display = 'none';
+  $('end').classList.add('hidden');
+  $('pause').classList.add('hidden');
+
+  if (cooldownTimer) {
+    clearInterval(cooldownTimer);
+    cooldownTimer = null;
+  }
+
+  cfg.team = cfg.team !== undefined ? Number(cfg.team) : 0;
+  cooldownSecondsLeft = 5;
+
+  const timerEl = $('cd-timer-count');
+  if (timerEl) timerEl.textContent = '5';
+  const fillEl = $('cd-progress-fill');
+  if (fillEl) fillEl.style.width = '100%';
+
+  const overlay = $('prematch-cooldown');
+  if (overlay) overlay.classList.remove('hidden');
+
+  renderCooldownView();
+  sound.ensure();
+  sound.ui();
+
+  const startTime = Date.now();
+  const duration = 5000;
+
+  cooldownTimer = setInterval(() => {
+    const elapsed = Date.now() - startTime;
+    const remaining = Math.max(0, duration - elapsed);
+    const secs = Math.ceil(remaining / 1000);
+
+    if (secs !== cooldownSecondsLeft && secs > 0) {
+      cooldownSecondsLeft = secs;
+      if (timerEl) timerEl.textContent = String(secs);
+      sound.ensure();
+      sound.ui();
+    }
+
+    const progress = Math.max(0, Math.min(100, (remaining / duration) * 100));
+    if (fillEl) fillEl.style.width = progress + '%';
+
+    if (remaining <= 0) {
+      clearInterval(cooldownTimer);
+      cooldownTimer = null;
+      launchGame();
+    }
+  }, 50);
+}
+
+function triggerMatchStart() {
+  if (cfg.mode === 'tva' || cfg.mode === 'tdm') {
+    startPrematchCooldown();
+  } else {
+    launchGame();
+  }
+}
+
+// Bind cooldown UI buttons
+const cdCardAt = $('cd-card-at');
+const cdBtnAt = $('cd-btn-at');
+if (cdCardAt) cdCardAt.addEventListener('click', () => selectTeam(0));
+if (cdBtnAt) cdBtnAt.addEventListener('click', (e) => { e.stopPropagation(); selectTeam(0); });
+
+const cdCardT = $('cd-card-t');
+const cdBtnT = $('cd-btn-t');
+if (cdCardT) cdCardT.addEventListener('click', () => selectTeam(1));
+if (cdBtnT) cdBtnT.addEventListener('click', (e) => { e.stopPropagation(); selectTeam(1); });
+
+const cdDeployBtn = $('cd-btn-deploy');
+if (cdDeployBtn) {
+  cdDeployBtn.addEventListener('click', () => {
+    sound.ensure();
+    sound.ui();
+    launchGame();
+  });
+}
+
+const cdCancelBtn = $('cd-btn-cancel');
+if (cdCancelBtn) {
+  cdCancelBtn.addEventListener('click', () => {
+    if (cooldownTimer) {
+      clearInterval(cooldownTimer);
+      cooldownTimer = null;
+    }
+    const overlay = $('prematch-cooldown');
+    if (overlay) overlay.classList.add('hidden');
+    $('menu').style.display = '';
+    uiClick();
+  });
+}
+
+// Keyboard shortcuts during cooldown
+window.addEventListener('keydown', (e) => {
+  const cdOverlay = $('prematch-cooldown');
+  if (!cdOverlay || cdOverlay.classList.contains('hidden')) return;
+
+  if (e.key === '1') {
+    e.preventDefault();
+    selectTeam(0);
+  } else if (e.key === '2') {
+    e.preventDefault();
+    selectTeam(1);
+  } else if (e.code === 'Space' || e.code === 'Enter') {
+    e.preventDefault();
+    sound.ensure();
+    sound.ui();
+    launchGame();
+  } else if (e.code === 'Escape') {
+    e.preventDefault();
+    if (cooldownTimer) {
+      clearInterval(cooldownTimer);
+      cooldownTimer = null;
+    }
+    cdOverlay.classList.add('hidden');
+    $('menu').style.display = '';
+  }
+});
+
+// Override match start entry points
+$('deploy').onclick = triggerMatchStart;
+$('btn-again').onclick = triggerMatchStart;
+$('btn-restart').onclick = triggerMatchStart;
+vf.startMatch = triggerMatchStart;
+
 /* ============================== INIT ============================== */
 
 renderPlayerChip();
 renderModes();
+renderTeamSelector();
 renderMaps();
 renderDiff();
 renderMutators();
