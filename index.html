@@ -199,6 +199,7 @@
                 </select>
               </label>
               <div class="opt"><span>Touch Controls</span><div class="seg" id="s-touch"><button data-v="auto">Auto</button><button data-v="on">On</button><button data-v="off">Off</button></div></div>
+              <label class="opt check hidden" id="s-autofire-row"><input type="checkbox" id="s-autofire" /> <span>Auto-Fire (Mobile &amp; Tablet)</span></label>
               <label class="opt check"><input type="checkbox" id="s-fps" /> <span>Show FPS</span></label>
               <label class="opt check"><input type="checkbox" id="s-invert" /> <span>Invert Y axis</span></label>
             </div>
@@ -227,6 +228,7 @@
               <ul>
                 <li><b>Left Thumb:</b> Drag joystick to move (push full forward to auto-sprint, or tap <b>RUN</b>).</li>
                 <li><b>Right Side:</b> Drag anywhere on the right screen (or while holding Fire) to aim.</li>
+                <li><b>Auto-Fire (Mobile &amp; Tablet):</b> Automatically fires when aiming directly at an enemy (tap <b>AUTO</b> pill to toggle).</li>
                 <li><b>Buttons:</b> Tap <b>ADS</b> to toggle sights/scope, <b>SLD</b> to crouch/slide, weapon pills to switch.</li>
                 <li><b>Top Bar / Score:</b> Tap the score bar or top-right scoreboard button to view standings; tap <b>☰</b> to pause.</li>
               </ul>
@@ -359,6 +361,9 @@
         </button>
         <button type="button" id="btn-sprint" class="tc-btn sprint" aria-label="Auto sprint">
           <span>RUN</span>
+        </button>
+        <button type="button" id="btn-autofire" class="tc-btn autofire hidden" aria-label="Toggle auto fire">
+          <span>AUTO</span>
         </button>
         <button type="button" id="btn-scope-zoom" class="tc-btn scope-zoom-btn hidden" aria-label="Cycle scope zoom">8×</button>
         <button type="button" id="btn-score-m" class="tc-btn mscore" aria-label="Scoreboard">

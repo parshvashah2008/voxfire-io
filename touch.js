@@ -12,7 +12,9 @@ const TOUCH_LOOK_SCALE = 3.2;
 function isCoarseHardware() {
   const uaMobile = /Android|iPhone|iPad|iPod|Mobi/i.test(navigator.userAgent);
   const coarse = Boolean(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
-  const compactTouch = ('ontouchstart' in window || navigator.maxTouchPoints > 0)
+  const fine = Boolean(window.matchMedia && window.matchMedia('(pointer: fine)').matches);
+  const compactTouch = !fine
+    && ('ontouchstart' in window || navigator.maxTouchPoints > 0)
     && Math.min(window.innerWidth, window.innerHeight) <= 900;
   return uaMobile || coarse || compactTouch;
 }
@@ -20,7 +22,7 @@ function isCoarseHardware() {
 /**
  * Binds all mobile HUD touch controls to the VOXFIRE game instance.
  */
-export function createTouchController(game, profile, sound) {
+export function createTouchController(game, profile, saveProfile, sound) {
   let touchSeen = false;
   let sprintLocked = false;
   let initialized = false;
@@ -31,7 +33,7 @@ export function createTouchController(game, profile, sound) {
     const mode = profile.settings.touchControls || 'auto';
     if (mode === 'on') return true;
     if (mode === 'off') return false;
-    return touchSeen || isCoarseHardware();
+    return touchSeen || game.isMobileDevice || isCoarseHardware();
   }
 
   function syncTouchMode() {
@@ -43,6 +45,10 @@ export function createTouchController(game, profile, sound) {
       hint.textContent = active
         ? 'Tap Resume to continue.'
         : 'Click Resume to recapture your mouse.';
+    }
+    const autoBtn = el('btn-autofire');
+    if (autoBtn) {
+      autoBtn.classList.toggle('hidden', !(game.isMobileDevice && active));
     }
     return active;
   }
@@ -222,6 +228,7 @@ export function createTouchController(game, profile, sound) {
     const grenadeBtn = el('btn-grenade');
     const swapBtn = el('btn-swap');
     const sprintBtn = el('btn-sprint');
+    const autoFireBtn = el('btn-autofire');
     const scopeZoomBtn = el('btn-scope-zoom');
     const pauseBtn = el('btn-pause-m');
     const scoreBtn = el('btn-score-m');
@@ -257,6 +264,20 @@ export function createTouchController(game, profile, sound) {
         e.preventDefault();
         sprintLocked = !sprintLocked;
         game.touch.sprint = sprintLocked || game.touch.moveY < SPRINT_Y_THRESHOLD;
+        sound.ensure();
+        sound.ui();
+      }, { passive: false });
+    }
+
+    if (autoFireBtn) {
+      autoFireBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (!game.isMobileDevice) return;
+        const next = profile.settings.autoFire === false;
+        profile.settings.autoFire = next;
+        saveProfile();
+        const chk = el('s-autofire');
+        if (chk) chk.checked = next;
         sound.ensure();
         sound.ui();
       }, { passive: false });
@@ -356,11 +377,17 @@ export function createTouchController(game, profile, sound) {
     }
     const adsBtn = el('btn-ads');
     const sprintBtn = el('btn-sprint');
+    const autoFireBtn = el('btn-autofire');
     const scoreBtn = el('btn-score-m');
     const zoomBtn = el('btn-scope-zoom');
 
     if (adsBtn) adsBtn.classList.toggle('active', Boolean(game.touch.ads));
     if (sprintBtn) sprintBtn.classList.toggle('active', sprintLocked);
+    if (autoFireBtn) {
+      const enabled = game.isMobileDevice && profile.settings.autoFire !== false;
+      autoFireBtn.classList.toggle('active', enabled);
+      autoFireBtn.classList.toggle('firing', enabled && Boolean(game.autoFiring));
+    }
     if (scoreBtn) scoreBtn.classList.toggle('active', Boolean(game.touch.scoreboard));
     if (zoomBtn) {
       const def = p?.weapon?.def;

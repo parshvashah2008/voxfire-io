@@ -2403,6 +2403,31 @@ body.touch-ui:not(.game-paused) #touch-controls {
   color: #fff;
 }
 
+.tc-btn.autofire {
+  width: auto;
+  min-width: 52px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 999px;
+  left: calc(env(safe-area-inset-left, 0px) + 66px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 171px);
+  font-size: 10px;
+  letter-spacing: 0.7px;
+}
+
+.tc-btn.autofire.active {
+  border-color: var(--cyan);
+  background: rgba(76, 212, 255, 0.25);
+  color: #e6fbff;
+}
+
+.tc-btn.autofire.firing {
+  border-color: var(--accent);
+  background: rgba(255, 122, 26, 0.45);
+  box-shadow: 0 0 14px rgba(255, 122, 26, 0.55);
+  color: #fff;
+}
+
 .tc-btn.scope-zoom-btn {
   width: auto;
   min-width: 54px;
@@ -2747,6 +2772,10 @@ body.touch-ui #popup b {
 
   body.touch-ui .tc-btn.sprint {
     bottom: calc(env(safe-area-inset-bottom, 0px) + 150px);
+  }
+
+  body.touch-ui .tc-btn.autofire {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 153px);
   }
 
   body.touch-ui #death-screen {
