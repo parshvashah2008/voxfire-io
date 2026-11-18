@@ -2232,9 +2232,29 @@ body.touch-ui:not(.game-paused) #touch-controls {
   z-index: 1;
 }
 
-body.touch-ui #btn-fire,
-body.touch-ui #btn-autofire {
-  display: none !important;
+#autofire-indicator {
+  display: none;
+  position: fixed;
+  left: 50%;
+  top: calc(50% + 22px);
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #ff3838;
+  background: rgba(255, 56, 56, 0.15);
+  border: 1px solid rgba(255, 56, 56, 0.5);
+  padding: 1px 6px;
+  border-radius: 4px;
+  text-shadow: 0 0 8px rgba(255, 56, 56, 0.8);
+  pointer-events: none;
+  user-select: none;
+  z-index: 10;
+}
+
+body.auto-firing #autofire-indicator {
+  display: block;
 }
 
 body.auto-firing #crosshair i {
@@ -2421,27 +2441,40 @@ body.auto-firing #crosshair .dot {
 
 .tc-btn.autofire {
   width: auto;
-  min-width: 52px;
-  height: 36px;
+  min-width: 68px;
+  height: 34px;
   padding: 0 10px;
   border-radius: 999px;
-  left: calc(env(safe-area-inset-left, 0px) + 66px);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 171px);
+  right: calc(env(safe-area-inset-right, 0px) + 140px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 110px);
+  left: auto;
   font-size: 10px;
-  letter-spacing: 0.7px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tc-btn.autofire.active {
   border-color: var(--cyan);
-  background: rgba(76, 212, 255, 0.25);
+  background: rgba(76, 212, 255, 0.28);
+  box-shadow: 0 0 12px rgba(76, 212, 255, 0.4);
   color: #e6fbff;
 }
 
 .tc-btn.autofire.firing {
-  border-color: var(--accent);
-  background: rgba(255, 122, 26, 0.45);
-  box-shadow: 0 0 14px rgba(255, 122, 26, 0.55);
+  border-color: #ff3838;
+  background: rgba(255, 56, 56, 0.55);
+  box-shadow: 0 0 16px rgba(255, 56, 56, 0.75);
   color: #fff;
+  animation: afPulse 0.4s infinite alternate;
+}
+
+@keyframes afPulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
 }
 
 .tc-btn.scope-zoom-btn {
@@ -2791,7 +2824,9 @@ body.touch-ui #popup b {
   }
 
   body.touch-ui .tc-btn.autofire {
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 153px);
+    right: calc(env(safe-area-inset-right, 0px) + 130px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 104px);
+    left: auto;
   }
 
   body.touch-ui #death-screen {

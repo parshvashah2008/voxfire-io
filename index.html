@@ -206,7 +206,7 @@
                 </select>
               </label>
               <div class="opt"><span>Touch Controls</span><div class="seg" id="s-touch"><button data-v="auto">Auto</button><button data-v="on">On</button><button data-v="off">Off</button></div></div>
-              <label class="opt check hidden" id="s-autofire-row"><input type="checkbox" id="s-autofire" checked disabled /> <span>Auto-Fire: Always On (Mobile &amp; Tablet)</span></label>
+              <label class="opt check" id="s-autofire-row"><input type="checkbox" id="s-autofire" checked /> <span>Auto-Fire (Mobile &amp; Tablet)</span></label>
               <label class="opt check"><input type="checkbox" id="s-fps" /> <span>Show FPS</span></label>
               <label class="opt check"><input type="checkbox" id="s-invert" /> <span>Invert Y axis</span></label>
             </div>
@@ -260,6 +260,7 @@
     <!-- ============================== HUD ============================== -->
     <div id="hud" class="hidden">
       <div id="crosshair" data-mode="normal"><i class="l"></i><i class="r"></i><i class="t"></i><i class="b"></i><i class="dot"></i></div>
+      <div id="autofire-indicator">LOCKED</div>
       <div id="hitmarker"><i></i><i></i><i></i><i></i></div>
       <div id="scope">
         <div class="lens">
@@ -369,8 +370,8 @@
         <button type="button" id="btn-sprint" class="tc-btn sprint" aria-label="Auto sprint">
           <span>RUN</span>
         </button>
-        <button type="button" id="btn-autofire" class="tc-btn autofire hidden" aria-label="Toggle auto fire">
-          <span>AUTO</span>
+        <button type="button" id="btn-autofire" class="tc-btn autofire" aria-label="Toggle auto fire">
+          <span>AUTO ON</span>
         </button>
         <button type="button" id="btn-scope-zoom" class="tc-btn scope-zoom-btn hidden" aria-label="Cycle scope zoom">8×</button>
         <button type="button" id="btn-score-m" class="tc-btn mscore" aria-label="Scoreboard">

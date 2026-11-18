@@ -615,9 +615,12 @@ const touchCtrl = createTouchController(game, profile, saveProfile, sound);
 const autoFireRow = $('s-autofire-row');
 const autoFireCheck = $('s-autofire');
 if (autoFireRow && autoFireCheck) {
-  autoFireRow.classList.toggle('hidden', !game.isMobileDevice);
-  profile.settings.autoFire = true;
-  autoFireCheck.checked = true;
+  autoFireCheck.checked = profile.settings.autoFire !== false;
+  autoFireCheck.addEventListener('change', () => {
+    uiClick();
+    profile.settings.autoFire = autoFireCheck.checked;
+    saveProfile();
+  });
 }
 
 function renderTouchButtons() {

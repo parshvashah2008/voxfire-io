@@ -49,11 +49,11 @@ export function createTouchController(game, profile, saveProfile, sound) {
     }
     const fireBtn = el('btn-fire');
     if (fireBtn) {
-      fireBtn.classList.toggle('hidden', active);
+      fireBtn.classList.remove('hidden');
     }
     const autoBtn = el('btn-autofire');
     if (autoBtn) {
-      autoBtn.classList.add('hidden');
+      autoBtn.classList.toggle('hidden', !active);
     }
     return active;
   }
@@ -275,9 +275,8 @@ export function createTouchController(game, profile, saveProfile, sound) {
     }
 
     if (autoFireBtn) {
-      autoFireBtn.addEventListener('touchstart', (e) => {
+      const toggleAutoFire = (e) => {
         e.preventDefault();
-        if (!game.isMobileDevice) return;
         const next = profile.settings.autoFire === false;
         profile.settings.autoFire = next;
         saveProfile();
@@ -285,7 +284,9 @@ export function createTouchController(game, profile, saveProfile, sound) {
         if (chk) chk.checked = next;
         sound.ensure();
         sound.ui();
-      }, { passive: false });
+      };
+      autoFireBtn.addEventListener('touchstart', toggleAutoFire, { passive: false });
+      autoFireBtn.addEventListener('click', toggleAutoFire);
     }
 
     if (reloadBtn) {
@@ -387,14 +388,18 @@ export function createTouchController(game, profile, saveProfile, sound) {
     const scoreBtn = el('btn-score-m');
     const zoomBtn = el('btn-scope-zoom');
 
-    if (fireBtn) fireBtn.classList.add('hidden');
-    if (autoFireBtn) autoFireBtn.classList.add('hidden');
+    if (fireBtn) fireBtn.classList.remove('hidden');
     if (adsBtn) adsBtn.classList.toggle('active', Boolean(game.touch.ads));
     if (sprintBtn) sprintBtn.classList.toggle('active', sprintLocked);
     if (autoFireBtn) {
-      const enabled = game.isMobileDevice && profile.settings.autoFire !== false;
+      autoFireBtn.classList.remove('hidden');
+      const enabled = profile.settings.autoFire !== false;
       autoFireBtn.classList.toggle('active', enabled);
       autoFireBtn.classList.toggle('firing', enabled && Boolean(game.autoFiring));
+      const span = autoFireBtn.querySelector('span');
+      if (span) {
+        span.textContent = (enabled && game.autoFiring) ? 'FIRING' : (enabled ? 'AUTO ON' : 'AUTO OFF');
+      }
     }
     if (scoreBtn) scoreBtn.classList.toggle('active', Boolean(game.touch.scoreboard));
     if (zoomBtn) {
