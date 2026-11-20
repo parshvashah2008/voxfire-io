@@ -48,18 +48,23 @@
             <div class="play-choice" id="play-choice">
               <div class="play-choice-head">
                 <h2>Choose Mode</h2>
-                <p class="muted">Play solo against AI bots, or host/join a private room with friends.</p>
+                <p class="muted">Join global online players, create private rooms with friends, or practice offline.</p>
               </div>
               <div class="play-choice-grid">
-                <button type="button" class="choice-card bots" id="choose-bots">
-                  <span class="choice-badge">SOLO / PRACTICE</span>
-                  <strong>VS Bots</strong>
-                  <span>Free For All, Team Deathmatch, 4v4 T vs AT, or Gun Game against AI bots.</span>
+                <button type="button" class="choice-card global" id="choose-global">
+                  <span class="choice-badge global-badge">🌐 GLOBAL PLAYERS</span>
+                  <strong>Play Online</strong>
+                  <span>Drop into live matches with unknown online players worldwide (GTA Online style · No bots).</span>
                 </button>
                 <button type="button" class="choice-card friends" id="choose-friends">
-                  <span class="choice-badge">PRIVATE ROOMS</span>
-                  <strong>VS Friends</strong>
-                  <span>Host FFA, TDM, 4v4 T vs AT, or Gun Game with a shareable room code or link.</span>
+                  <span class="choice-badge">🔒 PRIVATE ROOM</span>
+                  <strong>Play With Friends</strong>
+                  <span>Host or join a private room with a code or invite link. Pure PvP with friends, no bots.</span>
+                </button>
+                <button type="button" class="choice-card bots" id="choose-bots">
+                  <span class="choice-badge">🤖 SOLO / PRACTICE</span>
+                  <strong>VS Bots</strong>
+                  <span>Practice offline against AI bots with adjustable difficulty and bot counts.</span>
                 </button>
               </div>
             </div>
@@ -69,27 +74,40 @@
                 <button type="button" class="copy-btn" id="btn-back-choice">← Back</button>
                 <span class="play-flow-mode" id="play-flow-label">VS BOTS</span>
               </div>
-              <button type="button" class="copy-btn accent" id="btn-switch-play">Switch to VS Friends</button>
+              <button type="button" class="copy-btn accent" id="btn-switch-play">Switch to Global Players</button>
             </div>
 
             <div class="friends-box hidden" id="friends-box">
-              <div class="friends-idle" id="friends-idle">
-                <div class="friends-title">Play With Friends</div>
+              <div class="friends-idle hidden" id="global-idle">
+                <div class="friends-title">🌐 Global Matchmaking (GTA Online Style)</div>
+                <p class="muted" style="margin-top:-6px; font-size:12px;">Quick-join live public arenas with random global players worldwide. No bots, pure PvP.</p>
                 <div class="friends-actions">
-                  <button type="button" class="btn primary small" id="btn-host">Host FFA</button>
-                  <button type="button" class="btn small" id="btn-host-tdm">Host TDM</button>
-                  <button type="button" class="btn small accent-tva" id="btn-host-tva">Host 4v4 T vs AT</button>
-                  <button type="button" class="btn small accent-gg" id="btn-host-gg">Host Gun Game</button>
+                  <button type="button" class="btn primary small" id="btn-quick-ffa">Global FFA</button>
+                  <button type="button" class="btn small" id="btn-quick-tdm">Global TDM</button>
+                  <button type="button" class="btn small accent-tva" id="btn-quick-tva">Global 4v4 T vs AT</button>
+                  <button type="button" class="btn small accent-gg" id="btn-quick-gg">Global Gun Game</button>
+                </div>
+              </div>
+
+              <div class="friends-idle" id="friends-idle">
+                <div class="friends-title">🔒 Private Room (Play With Friends)</div>
+                <p class="muted" style="margin-top:-6px; font-size:12px;">Create a private match or join an invite link. Only your friends can enter, strictly 0 bots.</p>
+                <div class="friends-actions">
+                  <button type="button" class="btn primary small" id="btn-host">Host Private FFA</button>
+                  <button type="button" class="btn small" id="btn-host-tdm">Host Private TDM</button>
+                  <button type="button" class="btn small accent-tva" id="btn-host-tva">Host Private 4v4</button>
+                  <button type="button" class="btn small accent-gg" id="btn-host-gg">Host Private GG</button>
                   <div class="join-group">
-                    <input type="text" id="room-join-input" placeholder="Enter room code or invite link..." maxlength="140" />
-                    <button type="button" class="btn small" id="btn-join">Join</button>
+                    <input type="text" id="room-join-input" placeholder="Enter private code or invite link..." maxlength="140" />
+                    <button type="button" class="btn small" id="btn-join">Join Room</button>
                   </div>
                 </div>
               </div>
+
               <div class="room-lobby hidden" id="room-lobby">
                 <div class="room-head">
                   <div class="room-badge-wrap">
-                    <span class="room-label">ROOM CODE</span>
+                    <span class="room-label" id="room-badge-label">ROOM CODE</span>
                     <b class="room-code" id="room-code">------</b>
                     <button type="button" class="copy-btn" id="btn-copy-code">Copy Code</button>
                     <button type="button" class="copy-btn accent" id="btn-copy-link">Copy Invite Link</button>
@@ -103,7 +121,7 @@
                 <div class="room-members" id="room-members"></div>
               </div>
               <div class="room-status" id="room-status"></div>
-              <div class="friends-hint hidden" id="friends-hint">Pick a mode above to create a room, or paste a friend's room code / link to join.</div>
+              <div class="friends-hint hidden" id="friends-hint">Pick a mode above to connect, or enter a room code/link to join friends.</div>
             </div>
 
             <div class="play-setup hidden" id="play-setup">
@@ -119,11 +137,11 @@
               <h2>Arena</h2>
               <div class="cards maps" id="maps"></div>
               <div class="opts">
-                <label class="opt">
+                <label class="opt" id="s-bots-row">
                   <span>Bots <b id="bots-val">7</b></span>
                   <input type="range" id="opt-bots" min="0" max="11" value="7" />
                 </label>
-                <div class="opt">
+                <div class="opt" id="s-diff-row">
                   <span>Bot Skill</span>
                   <div class="seg" id="opt-diff"></div>
                 </div>

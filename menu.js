@@ -785,6 +785,26 @@ $('btn-host-gg').addEventListener('click', () => {
   net.hostRoom('gungame');
 });
 
+$('btn-quick-ffa')?.addEventListener('click', () => {
+  uiClick();
+  net.quickPlayGlobal('ffa');
+});
+
+$('btn-quick-tdm')?.addEventListener('click', () => {
+  uiClick();
+  net.quickPlayGlobal('tdm');
+});
+
+$('btn-quick-tva')?.addEventListener('click', () => {
+  uiClick();
+  net.quickPlayGlobal('tva');
+});
+
+$('btn-quick-gg')?.addEventListener('click', () => {
+  uiClick();
+  net.quickPlayGlobal('gungame');
+});
+
 function submitJoin() {
   const input = $('room-join-input');
   uiClick();
@@ -831,27 +851,46 @@ $('btn-quit').onclick = () => {
   if (origQuit) origQuit();
 };
 
-let playFlow = null; // null | 'bots' | 'friends'
+let playFlow = null; // null | 'global' | 'friends' | 'bots'
 
 function updatePlayLayout(st = net.getState()) {
   if (st.role !== 'solo') {
-    playFlow = 'friends';
+    playFlow = st.isGlobal ? 'global' : 'friends';
   }
   const choosing = playFlow === null;
   $('play-choice').classList.toggle('hidden', !choosing);
   $('play-flow-bar').classList.toggle('hidden', choosing);
-  $('friends-box').classList.toggle('hidden', playFlow !== 'friends');
-  $('friends-hint').classList.toggle('hidden', playFlow !== 'friends' || st.role !== 'solo');
-  $('play-setup').classList.toggle('hidden', choosing || (playFlow === 'friends' && st.role === 'solo'));
+
+  const isMulti = playFlow === 'global' || playFlow === 'friends';
+  $('friends-box').classList.toggle('hidden', !isMulti);
+  const inRoom = st.role !== 'solo';
+  $('global-idle')?.classList.toggle('hidden', playFlow !== 'global' || inRoom);
+  $('friends-idle')?.classList.toggle('hidden', playFlow !== 'friends' || inRoom);
+  $('friends-hint').classList.toggle('hidden', !isMulti || inRoom);
+  $('play-setup').classList.toggle('hidden', choosing || (isMulti && !inRoom));
+
+  const isBots = playFlow === 'bots';
+  $('s-bots-row')?.classList.toggle('hidden', !isBots);
+  $('s-diff-row')?.classList.toggle('hidden', !isBots);
 
   const lbl = $('play-flow-label');
-  lbl.textContent = playFlow === 'friends' ? 'VS FRIENDS' : 'VS BOTS';
-  lbl.classList.toggle('friends', playFlow === 'friends');
-  $('btn-switch-play').textContent = playFlow === 'friends' ? 'Switch to VS Bots' : 'Switch to VS Friends';
+  if (playFlow === 'global') {
+    lbl.textContent = '🌐 GLOBAL PLAYERS';
+    lbl.className = 'play-flow-mode global';
+    $('btn-switch-play').textContent = 'Switch to Private Room';
+  } else if (playFlow === 'friends') {
+    lbl.textContent = '🔒 PRIVATE ROOM';
+    lbl.className = 'play-flow-mode friends';
+    $('btn-switch-play').textContent = 'Switch to VS Bots';
+  } else {
+    lbl.textContent = '🤖 VS BOTS';
+    lbl.className = 'play-flow-mode';
+    $('btn-switch-play').textContent = 'Switch to Global Players';
+  }
 }
 
 function setPlayFlow(next) {
-  if (next !== 'friends' && net.role !== 'solo') {
+  if (next !== 'friends' && next !== 'global' && net.role !== 'solo') {
     net.leaveRoom(true);
   }
   playFlow = next;
@@ -862,11 +901,20 @@ function setPlayFlow(next) {
       botsInput.value = '7';
       botsVal.textContent = '7';
     }
-  } else if (next === 'friends') {
+  } else {
+    // For global and friends: NO BOTS!
+    cfg.bots = 0;
     botsInput.min = '0';
+    botsInput.value = '0';
+    botsVal.textContent = '0';
   }
   updatePlayLayout(net.getState());
 }
+
+$('choose-global')?.addEventListener('click', () => {
+  uiClick();
+  setPlayFlow('global');
+});
 
 $('choose-bots').addEventListener('click', () => {
   uiClick();
@@ -885,18 +933,25 @@ $('btn-back-choice').addEventListener('click', () => {
 
 $('btn-switch-play').addEventListener('click', () => {
   uiClick();
-  setPlayFlow(playFlow === 'friends' ? 'bots' : 'friends');
+  if (playFlow === 'global') setPlayFlow('friends');
+  else if (playFlow === 'friends') setPlayFlow('bots');
+  else setPlayFlow('global');
 });
 
 function renderRoomState(st) {
   updatePlayLayout(st);
   const inRoom = st.role !== 'solo';
-  $('friends-idle').classList.toggle('hidden', inRoom);
+  $('global-idle')?.classList.toggle('hidden', inRoom || playFlow !== 'global');
+  $('friends-idle')?.classList.toggle('hidden', inRoom || playFlow !== 'friends');
   $('room-lobby').classList.toggle('hidden', !inRoom);
   $('pause-room').classList.toggle('hidden', !inRoom);
   if (inRoom) {
     $('room-code').textContent = st.roomCode;
     $('pause-room-code').textContent = st.roomCode;
+    const badgeLabel = $('room-badge-label');
+    if (badgeLabel) badgeLabel.textContent = st.isGlobal ? 'GLOBAL MATCH' : 'ROOM CODE';
+    $('btn-copy-code')?.classList.toggle('hidden', Boolean(st.isGlobal));
+    $('btn-copy-link')?.classList.toggle('hidden', Boolean(st.isGlobal));
   }
 
   const statusEl = $('room-status');
@@ -914,18 +969,17 @@ function renderRoomState(st) {
       btn.addEventListener('click', () => {
         uiClick();
         cfg.mode = btn.dataset.rmode;
-        if (cfg.mode === 'tva' && cfg.bots === 0) cfg.bots = 7;
+        cfg.bots = 0; // Strictly 0 bots in multiplayer!
         net.broadcastLobby();
       });
     });
   }
 
   const mapName = (MAPS.find((m) => m.id === cfg.mapId) || MAPS[0]).name;
-  const diffLabel = (DIFFICULTIES[cfg.difficulty] || DIFFICULTIES.normal).label;
   const activeMuts = MUTATORS.filter((m) => cfg.mutators[m.key]).map((m) => m.label);
   const metaTags = [
     mapName,
-    `${cfg.bots} Bot${cfg.bots === 1 ? '' : 's'}${cfg.bots > 0 ? ` (${diffLabel})` : ''}`,
+    inRoom ? 'Online Players · 0 Bots' : `${cfg.bots} Bots`,
     cfg.mode === 'gungame' ? '16 Weapons' : `${cfg.scoreLimit} Kills`,
     `${Math.round(cfg.timeLimit / 60)} min`,
   ];

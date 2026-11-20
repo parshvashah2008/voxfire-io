@@ -92,6 +92,7 @@ class RoomNet {
   constructor() {
     this.peer = null;
     this.role = 'solo'; // 'solo' | 'host' | 'client'
+    this.isGlobal = false;
     this.roomCode = '';
     this.status = '';
     this.error = '';
@@ -121,10 +122,11 @@ class RoomNet {
     return {
       role: this.role,
       roomCode: this.roomCode,
+      isGlobal: Boolean(this.isGlobal),
       status: this.status,
       error: this.error,
       members: this.members,
-      inviteUrl: this.roomCode ? getInviteUrl(this.roomCode) : '',
+      inviteUrl: this.roomCode && !this.isGlobal ? getInviteUrl(this.roomCode) : '',
     };
   }
 
@@ -165,6 +167,7 @@ class RoomNet {
     const wasPlaying = game.state === 'playing' || game.state === 'paused';
     this.destroyPeer();
     this.role = 'solo';
+    this.isGlobal = false;
     this.roomCode = '';
     this.members = [];
     this.hostTeam = 0;
@@ -215,23 +218,17 @@ class RoomNet {
     this.leaveRoom(true);
     const code = randomCode(6);
     this.role = 'host';
+    this.isGlobal = false;
     this.roomCode = code;
     this.myId = 0;
     this.nextId = 100;
     this.hostTeam = 0;
     game.netMode = 'host';
-    if (presetMode === 'tva') {
-      cfg.mode = 'tva';
-      cfg.bots = 7;
-      cfg.scoreLimit = 25;
-    } else {
-      if (presetMode) cfg.mode = presetMode;
-      if (cfg.bots === 7) {
-        cfg.bots = 0; // default pure PvP with friends (host can raise slider anytime)
-      }
-    }
+    if (presetMode) cfg.mode = presetMode;
+    if (presetMode === 'tva') cfg.scoreLimit = 25;
+    cfg.bots = 0; // Strictly 0 bots in private rooms with friends!
     this.startBgLoop();
-    this.setStatus(`Creating room ${code}...`);
+    this.setStatus(`Creating private room ${code}...`);
 
     const peer = new window.Peer(PEER_PREFIX + code, { debug: 1, config: ICE_CONFIG });
     this.peer = peer;
@@ -239,7 +236,7 @@ class RoomNet {
     peer.on('open', () => {
       if (this.peer !== peer) return;
       this.updateMembers();
-      this.setStatus(`Room ${code} live — share code or invite link`);
+      this.setStatus(`Private Room ${code} live — share code or invite link`);
     });
 
     peer.on('connection', (conn) => {
@@ -250,10 +247,138 @@ class RoomNet {
     peer.on('error', (err) => {
       if (this.peer !== peer) return;
       if (err.type === 'unavailable-id') {
-        this.hostRoom();
+        this.hostRoom(presetMode);
         return;
       }
       this.setStatus('', `Room error: ${err.message || err.type || 'connection failed'}`);
+    });
+
+    peer.on('disconnected', () => {
+      if (this.peer === peer && !peer.destroyed) {
+        try { peer.reconnect(); } catch {}
+      }
+    });
+  }
+
+  /* ============================== GLOBAL PLAYERS (GTA ONLINE STYLE) ============================== */
+
+  quickPlayGlobal(mode = 'ffa') {
+    if (!window.Peer) {
+      this.setStatus('', 'Multiplayer library failed to load. Check internet connection.');
+      return;
+    }
+    this.leaveRoom(true);
+    cfg.mode = mode;
+    cfg.bots = 0; // ZERO BOTS in global matches!
+    this.isGlobal = true;
+    this.setStatus(`Searching for global ${mode.toUpperCase()} match with online players...`);
+
+    const targetCode = `GLOBAL-${mode.toUpperCase()}-1`;
+    const peer = new window.Peer({ debug: 1, config: ICE_CONFIG });
+    this.peer = peer;
+
+    let connected = false;
+    let fallbackTimer = null;
+
+    peer.on('open', () => {
+      if (this.peer !== peer) return;
+      const conn = peer.connect(PEER_PREFIX + targetCode, { reliable: true });
+      this.hostConn = conn;
+
+      fallbackTimer = setTimeout(() => {
+        if (!connected && this.peer === peer) {
+          try { conn.close(); } catch {}
+          this.hostGlobalRoom(mode, 1);
+        }
+      }, 3500);
+
+      conn.on('open', () => {
+        connected = true;
+        clearTimeout(fallbackTimer);
+        if (this.peer !== peer) return;
+        this.role = 'client';
+        this.isGlobal = true;
+        this.roomCode = targetCode;
+        game.netMode = 'client';
+        cfg.bots = 0;
+        this.setStatus(`Connected to Global ${mode.toUpperCase()} session! Joining online players...`);
+        conn.send({
+          t: 'join',
+          name: profile.name,
+          loadout: { ...profile.loadout },
+          camo: profile.camo,
+        });
+      });
+
+      conn.on('data', (msg) => {
+        if (this.peer !== peer || !msg || typeof msg !== 'object') return;
+        this.handleHostMessage(msg);
+      });
+
+      conn.on('close', () => {
+        clearTimeout(fallbackTimer);
+        if (this.peer === peer) {
+          this.leaveRoom(true);
+          this.setStatus('', 'Disconnected from global match.');
+        }
+      });
+
+      conn.on('error', () => {
+        if (!connected && this.peer === peer) {
+          clearTimeout(fallbackTimer);
+          this.hostGlobalRoom(mode, 1);
+        }
+      });
+    });
+
+    peer.on('error', (err) => {
+      if (!connected && this.peer === peer) {
+        clearTimeout(fallbackTimer);
+        this.hostGlobalRoom(mode, 1);
+      }
+    });
+  }
+
+  hostGlobalRoom(mode = 'ffa', shard = 1) {
+    this.leaveRoom(true);
+    const targetCode = `GLOBAL-${mode.toUpperCase()}-${shard}`;
+    this.role = 'host';
+    this.isGlobal = true;
+    this.roomCode = targetCode;
+    this.myId = 0;
+    this.nextId = 100;
+    this.hostTeam = 0;
+    game.netMode = 'host';
+    cfg.mode = mode;
+    cfg.bots = 0; // ZERO BOTS!
+    this.startBgLoop();
+    this.setStatus(`Hosting Global ${mode.toUpperCase()} session · Waiting for online players to drop in...`);
+
+    const peer = new window.Peer(PEER_PREFIX + targetCode, { debug: 1, config: ICE_CONFIG });
+    this.peer = peer;
+
+    peer.on('open', () => {
+      if (this.peer !== peer) return;
+      this.updateMembers();
+      this.setStatus(`Global ${mode.toUpperCase()} session active · Drop-in enabled (0 bots)`);
+    });
+
+    peer.on('connection', (conn) => {
+      if (this.peer !== peer) return;
+      this.bindHostConnection(conn);
+    });
+
+    peer.on('error', (err) => {
+      if (this.peer !== peer) return;
+      if (err.type === 'unavailable-id') {
+        if (shard < 3) {
+          this.hostGlobalRoom(mode, shard + 1);
+        } else {
+          this.setStatus('', 'All global lobbies busy. Please try again.');
+        }
+        return;
+      }
+      this.setStatus('', `Global room error: ${err.message || err.type}`);
     });
 
     peer.on('disconnected', () => {
@@ -791,7 +916,9 @@ class RoomNet {
     }
     this.leaveRoom(true);
     this.role = 'client';
+    this.isGlobal = false;
     this.roomCode = code;
+    cfg.bots = 0; // Strictly 0 bots in multiplayer!
     game.netMode = 'client';
     this.setStatus(`Connecting to room ${code}...`);
 
