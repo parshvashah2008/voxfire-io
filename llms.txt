@@ -1,0 +1,25 @@
+# VOXFIRE.io
+
+> VOXFIRE.io is a fast-paced, free-to-play 3D blocky multiplayer browser first-person shooter (FPS) built with Three.js and WebRTC. Play instantly in any web browser with no download or sign-up required.
+
+## Quick Facts
+- **Website**: https://parshvashah2008.github.io/voxfire-io/
+- **Genre**: 3D Browser FPS, Blocky Multiplayer Shooter, Action Game, IO Game
+- **Platforms**: Web Browser (Chrome, Safari, Firefox, Edge) on PC, Mac, Android, and iOS
+- **Player Modes**: Single-player vs Bots, 2-Player Private Rooms, 4v4 Multiplayer, Up to 8 Players
+- **Pricing**: Free-to-play (100% Free, No download)
+
+## Game Modes
+- **Global Players**: Drop-in public multiplayer matchmaking (GTA Online style) with real players worldwide.
+- **Private Room**: Create or join custom private rooms with a 6-character room code to play with friends (2-player, 4-player, 8-player matches).
+- **4v4 Terrorist vs Anti-Terrorist (T vs AT)**: Tactical team combat where players choose their faction during pre-game cooldown.
+- **Team Deathmatch (TDM)**: Fast-paced team battle.
+- **Free For All (FFA)**: Classic all-vs-all deathmatch.
+- **Gun Game**: Advance through 20 different weapon tiers with each elimination.
+- **Offline / Practice**: Solo play against AI bots with adjustable difficulty.
+
+## Key Features
+- Over 20 voxel weapons (Assault Rifles, Sniper Rifles, Shotguns, SMGs, Pistols).
+- Smooth 60Hz - 120Hz performance.
+- Mobile and tablet support with custom virtual joystick and Kour.io-style precision auto-fire.
+- Player progression: XP leveling, custom tags, and weapon loadouts.

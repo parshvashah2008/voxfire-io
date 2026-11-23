@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+
+# Allow AI Search & LLM scrapers
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://parshvashah2008.github.io/voxfire-io/sitemap.xml
