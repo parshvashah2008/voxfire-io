@@ -2359,11 +2359,14 @@ body.touch-ui:not(.game-paused) #touch-controls {
 }
 
 #look-zone {
-  top: 48px;
+  position: fixed;
+  top: 0;
   right: 0;
   bottom: 0;
-  width: 56vw;
-  z-index: 1;
+  width: 62vw;
+  z-index: 2;
+  pointer-events: auto;
+  touch-action: none;
 }
 
 #autofire-indicator {
@@ -2490,42 +2493,42 @@ body.auto-firing #crosshair .dot {
   box-shadow: 0 0 14px rgba(76, 212, 255, 0.35);
 }
 
-/* Ergonomic dual-fire layout (Right thumb fire + Left claw fire) */
+/* Ergonomic competitive mobile layout */
 .tc-btn.fire {
-  width: 72px;
-  height: 72px;
-  right: calc(env(safe-area-inset-right, 0px) + 18px);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 50px);
-  background: radial-gradient(circle at 40% 40%, rgba(255, 75, 85, 0.6), rgba(200, 30, 42, 0.52));
-  border-color: rgba(255, 110, 120, 0.75);
+  width: 74px;
+  height: 74px;
+  right: calc(env(safe-area-inset-right, 0px) + 20px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 36px);
+  background: radial-gradient(circle at 40% 40%, rgba(255, 75, 85, 0.65), rgba(200, 30, 42, 0.55));
+  border-color: rgba(255, 110, 120, 0.8);
 }
 
 .tc-btn.fire.pressed {
-  background: radial-gradient(circle at 40% 40%, rgba(255, 90, 100, 0.85), rgba(230, 40, 52, 0.78));
+  background: radial-gradient(circle at 40% 40%, rgba(255, 90, 100, 0.88), rgba(230, 40, 52, 0.8));
   border-color: #fff;
-  box-shadow: 0 0 20px rgba(255, 74, 90, 0.7);
+  box-shadow: 0 0 20px rgba(255, 74, 90, 0.75);
 }
 
 .tc-btn.fire-left {
-  width: 58px;
-  height: 58px;
-  left: calc(env(safe-area-inset-left, 0px) + 20px);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 220px);
-  background: radial-gradient(circle at 40% 40%, rgba(255, 75, 85, 0.52), rgba(200, 30, 42, 0.44));
-  border-color: rgba(255, 110, 120, 0.7);
+  width: 56px;
+  height: 56px;
+  left: calc(env(safe-area-inset-left, 0px) + 18px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 184px);
+  background: radial-gradient(circle at 40% 40%, rgba(255, 75, 85, 0.55), rgba(200, 30, 42, 0.45));
+  border-color: rgba(255, 110, 120, 0.75);
 }
 
 .tc-btn.fire-left.pressed {
-  background: radial-gradient(circle at 40% 40%, rgba(255, 90, 100, 0.85), rgba(230, 40, 52, 0.78));
+  background: radial-gradient(circle at 40% 40%, rgba(255, 90, 100, 0.88), rgba(230, 40, 52, 0.8));
   border-color: #fff;
   box-shadow: 0 0 18px rgba(255, 74, 90, 0.65);
 }
 
 .tc-btn.ads {
-  width: 50px;
-  height: 50px;
-  right: calc(env(safe-area-inset-right, 0px) + 100px);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 56px);
+  width: 52px;
+  height: 52px;
+  right: calc(env(safe-area-inset-right, 0px) + 106px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 40px);
 }
 
 .tc-btn.ads.active {
@@ -2537,48 +2540,48 @@ body.auto-firing #crosshair .dot {
 .tc-btn.jump {
   width: 52px;
   height: 52px;
-  right: calc(env(safe-area-inset-right, 0px) + 22px);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 132px);
+  right: calc(env(safe-area-inset-right, 0px) + 24px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 122px);
 }
 
 .tc-btn.crouch {
-  width: 46px;
-  height: 46px;
-  right: calc(env(safe-area-inset-right, 0px) + 88px);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 118px);
+  width: 48px;
+  height: 48px;
+  right: calc(env(safe-area-inset-right, 0px) + 94px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 110px);
   font-size: 11px;
 }
 
 .tc-btn.reload {
   width: 44px;
   height: 44px;
-  right: calc(env(safe-area-inset-right, 0px) + 84px);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 176px);
+  right: calc(env(safe-area-inset-right, 0px) + 26px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 186px);
   font-size: 16px;
 }
 
 .tc-btn.grenade {
-  width: 44px;
-  height: 44px;
-  right: calc(env(safe-area-inset-right, 0px) + 26px);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 196px);
+  width: 42px;
+  height: 42px;
+  right: calc(env(safe-area-inset-right, 0px) + 84px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 172px);
   font-size: 10px;
 }
 
 .tc-btn.swap {
-  width: 52px;
-  height: 36px;
-  border-radius: 10px;
-  right: calc(env(safe-area-inset-right, 0px) + 28px);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+  width: 54px;
+  height: 34px;
+  border-radius: 12px;
+  right: calc(env(safe-area-inset-right, 0px) + 170px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
   font-size: 17px;
 }
 
 .tc-btn.sprint {
   width: 42px;
   height: 42px;
-  left: calc(env(safe-area-inset-left, 0px) + 16px);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 168px);
+  left: calc(env(safe-area-inset-left, 0px) + 18px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 124px);
   font-size: 10px;
 }
 
@@ -2590,17 +2593,18 @@ body.auto-firing #crosshair .dot {
 
 .tc-btn.autofire {
   width: auto;
-  min-width: 68px;
-  height: 34px;
+  min-width: 76px;
+  height: 30px;
   padding: 0 10px;
   border-radius: 999px;
-  right: calc(env(safe-area-inset-right, 0px) + 140px);
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 110px);
+  right: calc(env(safe-area-inset-right, 0px) + 16px);
+  top: calc(env(safe-area-inset-top, 0px) + 54px);
+  bottom: auto;
   left: auto;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.8px;
-  z-index: 8;
+  z-index: 12;
   display: flex;
   align-items: center;
   justify-content: center;
