@@ -3905,4 +3905,12 @@ body.touch-ui #popup b {
   }
 }
 
+/* Auto-Fire setting row is dedicated to Mobile & Tablet touch devices */
+#s-autofire-row {
+  display: none;
+}
+body.touch-ui #s-autofire-row {
+  display: flex;
+}
+
 
