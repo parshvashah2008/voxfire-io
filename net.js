@@ -23,6 +23,16 @@ const {
   THREE,
 } = vf;
 
+// Anti-Cheat Hardening: Freeze weapon definitions to prevent console tampering
+try {
+  if (Array.isArray(WEAPONS)) {
+    for (const w of WEAPONS) {
+      if (w && typeof w === 'object') Object.freeze(w);
+    }
+    Object.freeze(WEAPONS);
+  }
+} catch {}
+
 const PEER_PREFIX = 'voxfire-room-';
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const ICE_CONFIG = {
@@ -735,7 +745,36 @@ class RoomNet {
 
   applyClientState(c, msg) {
     if (!c.alive) return;
-    c.pos.set(msg.x, msg.y, msg.z);
+    const tx = Number(msg.x);
+    const ty = Number(msg.y);
+    const tz = Number(msg.z);
+    if (!Number.isFinite(tx) || !Number.isFinite(ty) || !Number.isFinite(tz)) return;
+
+    // Host-Authoritative Anti-Cheat: Speedhack & Teleport Detection
+    if (c._lastValidPos) {
+      const dx = tx - c._lastValidPos.x;
+      const dy = ty - c._lastValidPos.y;
+      const dz = tz - c._lastValidPos.z;
+      const distSq = dx * dx + dy * dy + dz * dz;
+      // Allow up to 5.5m per tick (~40ms) to accommodate minor network latency jitter
+      const maxDistSq = 30.25; // 5.5m^2
+      if (distSq > maxDistSq && (game.time - (c.lastSpawnTime || 0)) > 2.0) {
+        // Speedhack or teleport attempt: clamp displacement to safe physical threshold
+        const dist = Math.sqrt(distSq);
+        const ratio = 5.0 / dist;
+        c.pos.x = c._lastValidPos.x + dx * ratio;
+        c.pos.y = c._lastValidPos.y + dy * ratio;
+        c.pos.z = c._lastValidPos.z + dz * ratio;
+        c.cheatFlags = (c.cheatFlags || 0) + 1;
+      } else {
+        c.pos.set(tx, ty, tz);
+      }
+    } else {
+      c.pos.set(tx, ty, tz);
+      c._lastValidPos = new THREE.Vector3();
+    }
+    c._lastValidPos.copy(c.pos);
+
     c.vel.set(msg.vx || 0, msg.vy || 0, msg.vz || 0);
     c.yaw = msg.yaw;
     c.pitch = msg.pitch;
@@ -755,10 +794,19 @@ class RoomNet {
     const def = findWeapon(msg.w);
     if (!def) return;
 
-    c.lastFired = game.time;
+    // Host-Authoritative Anti-Cheat: Rate-of-Fire Enforcement (Neutralizes rapid-fire / macro scripts)
+    const now = game.time;
+    const minInterval = (def.fireRate || 0.1) * 0.82; // 18% allowance for network packet jitter
+    if (c._lastHostShotTime && (now - c._lastHostShotTime) < minInterval) {
+      return; // Drop impossible rapid-fire packet
+    }
+    c._lastHostShotTime = now;
+    c.lastFired = now;
+
+    // Host-Authoritative Anti-Cheat: Line-of-sight & Eye position boundary check
     const eye = c.eye(new THREE.Vector3());
     const origin = new THREE.Vector3(msg.ox, msg.oy, msg.oz);
-    if (!Number.isFinite(origin.x) || origin.distanceTo(eye) > 2.8) {
+    if (!Number.isFinite(origin.x) || origin.distanceTo(eye) > 2.2) {
       origin.copy(eye);
     }
 
@@ -845,13 +893,16 @@ class RoomNet {
   handleClientGrenade(rec, msg) {
     const c = rec.char;
     if (!c.alive || (game.state !== 'playing' && game.state !== 'paused') || c.grenades <= 0 || c.grenadeCd > 0) return;
+    // Host-Authoritative Anti-Cheat: Grenade cooldown rate limit
+    if (c._lastHostNadeTime && (game.time - c._lastHostNadeTime) < 1.0) return;
+    c._lastHostNadeTime = game.time;
     c.grenades--;
     c.grenadeCd = 1;
     const eye = c.eye(new THREE.Vector3());
     const og = new THREE.Vector3(msg.ox, msg.oy, msg.oz);
-    if (!Number.isFinite(og.x) || og.distanceTo(eye) > 2.5) og.copy(eye);
+    if (!Number.isFinite(og.x) || og.distanceTo(eye) > 2.2) og.copy(eye);
     const vel = new THREE.Vector3(msg.vx, msg.vy, msg.vz);
-    if (vel.length() > 35) vel.setLength(35);
+    if (vel.length() > 32) vel.setLength(32);
     game.spawnProjectile(c, FRAG_SPEC, 'frag', og, vel, 1);
     const [vol, pan] = game.spatial(c.pos);
     sound.shot('knife', vol * 0.5, pan);

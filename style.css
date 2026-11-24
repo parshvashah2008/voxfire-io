@@ -958,10 +958,12 @@ kbd {
 
 #hitmarker.head i {
   background: #ffd400;
+  box-shadow: 0 0 8px rgba(255, 212, 0, 0.9);
 }
 
 #hitmarker.kill i {
   background: #ff3b4e;
+  box-shadow: 0 0 10px rgba(255, 59, 78, 0.95);
 }
 
 #hitmarker i:nth-child(1) { transform: rotate(45deg) translateX(5px); }
@@ -1052,6 +1054,19 @@ kbd {
 
 #vignette {
   background: radial-gradient(circle, transparent 48%, rgba(200, 15, 25, 0.72) 100%);
+  pointer-events: none;
+}
+
+@keyframes low-hp-pulse {
+  0% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+  100% { opacity: 0.35; transform: scale(1); }
+}
+
+body.low-health #vignette {
+  opacity: 1 !important;
+  animation: low-hp-pulse 0.9s infinite ease-in-out;
+  background: radial-gradient(circle, transparent 38%, rgba(220, 20, 35, 0.82) 100%);
 }
 
 #dmg-flash {
