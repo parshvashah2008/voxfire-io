@@ -2582,6 +2582,241 @@ body.touch-ui .scope-hint {
   display: none;
 }
 
+/* ==========================================================================
+   MOBILE COMPETITIVE CROSSHAIR — HIGH PRECISION & PINPOINT ACCURACY
+   ========================================================================== */
+body.touch-ui #crosshair {
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 25;
+}
+
+@media (pointer: coarse) {
+  #crosshair {
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    z-index: 25;
+  }
+}
+
+/* Base outline & shadows for all crosshair components on mobile */
+body.touch-ui #crosshair i {
+  background: var(--xhair);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.95), 0 0 3px rgba(0, 0, 0, 0.85);
+}
+
+@media (pointer: coarse) {
+  #crosshair i {
+    background: var(--xhair);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.95), 0 0 3px rgba(0, 0, 0, 0.85);
+  }
+}
+
+/* 1. Center Precision Dot — 5px laser core with crisp dark border ("To the point") */
+body.touch-ui #crosshair .dot {
+  width: 5px;
+  height: 5px;
+  left: -2.5px;
+  top: -2.5px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 20%, var(--xhair) 65%);
+  box-shadow: 0 0 0 1.2px #000000, 0 0 4px rgba(0, 0, 0, 0.9);
+  transition: transform 0.08s ease, background 0.08s ease;
+}
+
+@media (pointer: coarse) {
+  #crosshair .dot {
+    width: 5px;
+    height: 5px;
+    left: -2.5px;
+    top: -2.5px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ffffff 20%, var(--xhair) 65%);
+    box-shadow: 0 0 0 1.2px #000000, 0 0 4px rgba(0, 0, 0, 0.9);
+    transition: transform 0.08s ease, background 0.08s ease;
+  }
+}
+
+/* 2. Precision Crosshair Ticks — 2.5px solid width with high-contrast borders */
+body.touch-ui #crosshair .l,
+body.touch-ui #crosshair .r {
+  width: 9.5px;
+  height: 2.5px;
+  top: -1.25px;
+  border-radius: 1px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+@media (pointer: coarse) {
+  #crosshair .l,
+  #crosshair .r {
+    width: 9.5px;
+    height: 2.5px;
+    top: -1.25px;
+    border-radius: 1px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.7);
+  }
+}
+
+body.touch-ui #crosshair .t,
+body.touch-ui #crosshair .b {
+  width: 2.5px;
+  height: 9.5px;
+  left: -1.25px;
+  border-radius: 1px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+@media (pointer: coarse) {
+  #crosshair .t,
+  #crosshair .b {
+    width: 2.5px;
+    height: 9.5px;
+    left: -1.25px;
+    border-radius: 1px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.95), 0 1px 3px rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* Clamp spread gap on mobile so reticle stays tight around the center point */
+body.touch-ui #crosshair .l { right: clamp(6px, var(--gap), 18px); }
+body.touch-ui #crosshair .r { left: clamp(6px, var(--gap), 18px); }
+body.touch-ui #crosshair .t { bottom: clamp(6px, var(--gap), 18px); }
+body.touch-ui #crosshair .b { top: clamp(6px, var(--gap), 18px); }
+
+@media (pointer: coarse) {
+  #crosshair .l { right: clamp(6px, var(--gap), 18px); }
+  #crosshair .r { left: clamp(6px, var(--gap), 18px); }
+  #crosshair .t { bottom: clamp(6px, var(--gap), 18px); }
+  #crosshair .b { top: clamp(6px, var(--gap), 18px); }
+}
+
+/* 3. Tactical Concentric Target Ring — provides clear peripheral hitbox framing */
+body.touch-ui #crosshair::before {
+  content: '';
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  left: -11px;
+  top: -11px;
+  border-radius: 50%;
+  border: 1.2px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.65), inset 0 0 4px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.1s ease, box-shadow 0.1s ease;
+}
+
+@media (pointer: coarse) {
+  #crosshair::before {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    left: -11px;
+    top: -11px;
+    border-radius: 50%;
+    border: 1.2px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.65), inset 0 0 4px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+    transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.1s ease, box-shadow 0.1s ease;
+  }
+}
+
+/* 4. ADS Aim-Down-Sights on Mobile — Pure CQB Reflex Dot (Unobstructed View) */
+body.touch-ui #crosshair[data-mode="dot"] .dot {
+  width: 6px;
+  height: 6px;
+  left: -3px;
+  top: -3px;
+  box-shadow: 0 0 0 1.5px #000000, 0 0 8px var(--xhair);
+  transform: scale(1.15);
+}
+
+@media (pointer: coarse) {
+  #crosshair[data-mode="dot"] .dot {
+    width: 6px;
+    height: 6px;
+    left: -3px;
+    top: -3px;
+    box-shadow: 0 0 0 1.5px #000000, 0 0 8px var(--xhair);
+    transform: scale(1.15);
+  }
+}
+
+body.touch-ui #crosshair[data-mode="dot"]::before {
+  width: 14px;
+  height: 14px;
+  left: -7px;
+  top: -7px;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+@media (pointer: coarse) {
+  #crosshair[data-mode="dot"]::before {
+    width: 14px;
+    height: 14px;
+    left: -7px;
+    top: -7px;
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+/* 5. Auto-Firing / Enemy Lock-On Feedback on Mobile */
+body.touch-ui.auto-firing #crosshair::before {
+  border-color: #ff3333;
+  transform: scale(0.88);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.9), 0 0 10px rgba(255, 51, 51, 0.95);
+}
+
+@media (pointer: coarse) {
+  body.auto-firing #crosshair::before {
+    border-color: #ff3333;
+    transform: scale(0.88);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.9), 0 0 10px rgba(255, 51, 51, 0.95);
+  }
+}
+
+body.touch-ui.auto-firing #crosshair i {
+  background: #ff3333 !important;
+  box-shadow: 0 0 0 1px #000000, 0 0 8px rgba(255, 51, 51, 1) !important;
+}
+
+@media (pointer: coarse) {
+  body.auto-firing #crosshair i {
+    background: #ff3333 !important;
+    box-shadow: 0 0 0 1px #000000, 0 0 8px rgba(255, 51, 51, 1) !important;
+  }
+}
+
+body.touch-ui.auto-firing #crosshair .dot {
+  background: radial-gradient(circle, #ffffff 15%, #ff2222 65%) !important;
+  box-shadow: 0 0 0 1.5px #000000, 0 0 12px rgba(255, 34, 34, 1) !important;
+  transform: scale(1.4);
+}
+
+@media (pointer: coarse) {
+  body.auto-firing #crosshair .dot {
+    background: radial-gradient(circle, #ffffff 15%, #ff2222 65%) !important;
+    box-shadow: 0 0 0 1.5px #000000, 0 0 12px rgba(255, 34, 34, 1) !important;
+    transform: scale(1.4);
+  }
+}
+
+/* Contract ticks tightly inwards on enemy lock-on */
+body.touch-ui.auto-firing #crosshair .l { right: 5px !important; }
+body.touch-ui.auto-firing #crosshair .r { left: 5px !important; }
+body.touch-ui.auto-firing #crosshair .t { bottom: 5px !important; }
+body.touch-ui.auto-firing #crosshair .b { top: 5px !important; }
+
+@media (pointer: coarse) {
+  body.auto-firing #crosshair .l { right: 5px !important; }
+  body.auto-firing #crosshair .r { left: 5px !important; }
+  body.auto-firing #crosshair .t { bottom: 5px !important; }
+  body.auto-firing #crosshair .b { top: 5px !important; }
+}
+
 /* Touch HUD compact adjustments (works on phones in portrait & landscape) */
 body.touch-ui #minimap {
   width: 90px;
