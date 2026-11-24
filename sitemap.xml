@@ -12,4 +12,10 @@
       <image:caption>Play VOX FIRE (VOXFIRE.io) free online in your browser. 2 player and 4 player private rooms, global online multiplayer, and 20+ weapons.</image:caption>
     </image:image>
   </url>
+  <url>
+    <loc>https://parshvashah2008.github.io/voxfire-io/feed.xml</loc>
+    <lastmod>2026-11-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
 </urlset>
