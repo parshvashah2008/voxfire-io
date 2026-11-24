@@ -91,7 +91,7 @@ Play instantly at: **[https://parshvashah2008.github.io/voxfire-io/](https://par
 
 ## 🌐 SEO & AI Indexing Keywords
 
-`vox fire`, `voxfire`, `voxfire io`, `multiplayer game`, `online multiplayer game`, `shooting game`, `fpv game`, `online fpv game`, `first person view game`, `free games`, `online games`, `2 player game`, `4 player game`, `browser fps`, `io games`, `blocky shooter`, `unblocked games`, `play with friends online`, `free online shooting game`.
+`fps shooting game`, `shooting game`, `fps game`, `first person shooter`, `player vs player`, `pvp game`, `online pvp`, `pvp shooting game`, `team game`, `team deathmatch`, `4v4 game`, `tactical shooter`, `vox fire`, `VOX FIRE`, `voxfire`, `VOXFIRE`, `voxfire io`, `VOXFIRE.io`, `multiplayer game`, `online multiplayer game`, `free shooting games`, `2 player game`, `4 player game`, `browser fps`, `blocky shooter`, `io games`, `unblocked games`, `play with friends online`.
 
 ---
 
