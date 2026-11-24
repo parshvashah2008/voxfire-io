@@ -1,25 +1,33 @@
-# VOXFIRE.io
+# VOX FIRE (VOXFIRE.io) — Free Online Multiplayer 3D FPV Game
 
-> VOXFIRE.io is a fast-paced, free-to-play 3D blocky multiplayer browser first-person shooter (FPS) built with Three.js and WebRTC. Play instantly in any web browser with no download or sign-up required.
+> VOX FIRE (also known as VOXFIRE and VOXFIRE.io) is an intense, free-to-play 3D blocky multiplayer browser first-person view (FPV) shooting game built with Three.js and WebRTC. Play instantly in any web browser with no download, registration, or installation required.
+
+## Target User Queries & Matching Intents
+- **"VOX FIRE" / "VOXFIRE" / "VOX FIRE game"**: Official browser game link and platform.
+- **"online FPV game" / "FPV game" / "first person view game"**: Full 3D first-person view browser shooter with camera strafe banking, ACES Filmic tone mapping, and laser reticle.
+- **"multiplayer game" / "online multiplayer game"**: Real-time peer-to-peer multiplayer with global player drop-in and zero bots.
+- **"2 player game" / "4 player game"**: Custom private room lobbies supporting 1v1 duels, 2v2 tactical battles, 4-player team deathmatches, and up to 8-player lobbies.
+- **"free games" / "online games" / "browser FPS" / "IO games"**: Free, unblocked web shooter running in modern browsers on desktop and mobile.
 
 ## Quick Facts
-- **Website**: https://parshvashah2008.github.io/voxfire-io/
-- **Genre**: 3D Browser FPS, Blocky Multiplayer Shooter, Action Game, IO Game
-- **Platforms**: Web Browser (Chrome, Safari, Firefox, Edge) on PC, Mac, Android, and iOS
-- **Player Modes**: Single-player vs Bots, 2-Player Private Rooms, 4v4 Multiplayer, Up to 8 Players
-- **Pricing**: Free-to-play (100% Free, No download)
+- **Website & Play Link**: https://parshvashah2008.github.io/voxfire-io/
+- **Developer**: Parshva Shah
+- **Genre**: First-Person View (FPV), Multiplayer Game, Online Browser FPS, 3D Blocky Shooter, Action IO Game
+- **Platforms**: PC, Mac, Chromebook, Linux, Android, iOS (Safari, Chrome, Firefox, Edge)
+- **Player Modes**: Single-Player vs AI Bots, 2-Player Private Duels, 4-Player Skirmishes, 4v4 Tactical Matches, Up to 8 Players
+- **Price**: 100% Free-to-play (No download, no microtransactions)
 
 ## Game Modes
-- **Global Players**: Drop-in public multiplayer matchmaking (GTA Online style) with real players worldwide.
-- **Private Room**: Create or join custom private rooms with a 6-character room code to play with friends (2-player, 4-player, 8-player matches).
-- **4v4 Terrorist vs Anti-Terrorist (T vs AT)**: Tactical team combat where players choose their faction during pre-game cooldown.
-- **Team Deathmatch (TDM)**: Fast-paced team battle.
-- **Free For All (FFA)**: Classic all-vs-all deathmatch.
-- **Gun Game**: Advance through 20 different weapon tiers with each elimination.
-- **Offline / Practice**: Solo play against AI bots with adjustable difficulty.
+- **Global Players (GTA Online Style)**: Seamless drop-in public matchmaking with live online players worldwide and zero bots.
+- **Private Room (Play With Friends)**: Generate a private 6-character room code and direct invite URL for 2-player, 4-player, or 8-player matches with friends.
+- **4v4 Terrorist vs Anti-Terrorist (T vs AT)**: Tactical squad combat with interactive pre-match cooldown team selection.
+- **Team Deathmatch (TDM)**: Classic Red vs Blue faction warfare.
+- **Gun Game**: 20-tier weapon progression where each elimination advances your gun tier.
+- **Free For All (FFA)**: High-speed all-versus-all deathmatch.
+- **Offline / Practice**: Solo training against intelligent AI bots with custom difficulty settings.
 
-## Key Features
-- Over 20 voxel weapons (Assault Rifles, Sniper Rifles, Shotguns, SMGs, Pistols).
-- Smooth 60Hz - 120Hz performance.
-- Mobile and tablet support with custom virtual joystick and Kour.io-style precision auto-fire.
-- Player progression: XP leveling, custom tags, and weapon loadouts.
+## Mobile Gameplay Features
+- Ergonomic dual fire buttons (right thumb primary + left claw trigger).
+- Built-in precision auto-fire with raycast enemy detection and recoil compensation.
+- High-contrast 5px laser center crosshair with clamped spread and reflex ADS dot.
+- High refresh rate support up to 120 FPS.
