@@ -51,6 +51,10 @@ export function createTouchController(game, profile, saveProfile, sound) {
     if (fireBtn) {
       fireBtn.classList.remove('hidden');
     }
+    const fireLeftBtn = el('btn-fire-left');
+    if (fireLeftBtn) {
+      fireLeftBtn.classList.remove('hidden');
+    }
     const autoBtn = el('btn-autofire');
     if (autoBtn) {
       autoBtn.classList.toggle('hidden', !active);
@@ -226,6 +230,7 @@ export function createTouchController(game, profile, saveProfile, sound) {
 
   function bindActionButtons() {
     const fireBtn = el('btn-fire');
+    const fireLeftBtn = el('btn-fire-left');
     const adsBtn = el('btn-ads');
     const jumpBtn = el('btn-jump');
     const crouchBtn = el('btn-crouch');
@@ -246,6 +251,11 @@ export function createTouchController(game, profile, saveProfile, sound) {
     bindHoldButton(fireBtn, (down) => {
       game.touch.fire = down;
     });
+    if (fireLeftBtn) {
+      bindHoldButton(fireLeftBtn, (down) => {
+        game.touch.fireLeft = down;
+      });
+    }
     bindHoldButton(jumpBtn, (down) => {
       game.touch.jump = down;
     });
@@ -384,11 +394,13 @@ export function createTouchController(game, profile, saveProfile, sound) {
     const adsBtn = el('btn-ads');
     const sprintBtn = el('btn-sprint');
     const fireBtn = el('btn-fire');
+    const fireLeftBtn = el('btn-fire-left');
     const autoFireBtn = el('btn-autofire');
     const scoreBtn = el('btn-score-m');
     const zoomBtn = el('btn-scope-zoom');
 
     if (fireBtn) fireBtn.classList.remove('hidden');
+    if (fireLeftBtn) fireLeftBtn.classList.remove('hidden');
     if (adsBtn) adsBtn.classList.toggle('active', Boolean(game.touch.ads));
     if (sprintBtn) sprintBtn.classList.toggle('active', sprintLocked);
     if (autoFireBtn) {
