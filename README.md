@@ -1,4 +1,4 @@
-# VOX FIRE (VOXFIRE.io) — Free Online Multiplayer 3D FPV Shooting Game
+# VOX FIRE (VOXFIRE.io) — Free Online Multiplayer 3D FPS Shooting Game
 
 [![Play VOX FIRE Online](https://img.shields.io/badge/PLAY_NOW-VOXFIRE.io-ff7a1a?style=for-the-badge&logo=googlechrome&logoColor=white)](https://parshvashah2008.github.io/voxfire-io/)
 [![GitHub stars](https://img.shields.io/github/stars/parshvashah2008/voxfire-io?style=for-the-badge&color=brightgreen)](https://github.com/parshvashah2008/voxfire-io)

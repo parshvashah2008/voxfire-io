@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-  <title>VOX FIRE (VOXFIRE.io) — Free Online Multiplayer 3D FPV Shooting Game</title>
+  <title>VOX FIRE (VOXFIRE.io) — Free Online Multiplayer 3D FPS Shooting Game</title>
   <link>https://parshvashah2008.github.io/voxfire-io/</link>
-  <description>Play VOX FIRE free online! Fast 3D multiplayer FPV browser shooter with global matchmaking, 2 player and 4 player private rooms with friends, 4v4 T vs AT, 20+ weapons, and mobile touch auto-fire.</description>
+  <description>Play VOX FIRE free online! Fast 3D multiplayer FPS shooting game with global matchmaking, 2 player and 4 player private rooms with friends, 4v4 T vs AT, 20+ weapons, and mobile touch auto-fire.</description>
   <language>en-us</language>
   <atom:link href="https://parshvashah2008.github.io/voxfire-io/feed.xml" rel="self" type="application/rss+xml" />
   <item>
