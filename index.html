@@ -16,53 +16,103 @@
     <meta property="og:title" content="VOXFIRE.io — Free Online Multiplayer Browser FPS" />
     <meta property="og:description" content="Play VOXFIRE.io free online! Fast 3D blocky shooter with global multiplayer, private rooms with friends, 4v4 T vs AT, 20+ weapons, and auto-fire for mobile." />
     <meta property="og:site_name" content="VOXFIRE.io" />
+    <meta property="og:image" content="https://parshvashah2008.github.io/voxfire-io/og-image.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="VOXFIRE.io Free Online Multiplayer Browser FPS Game" />
 
     <!-- Twitter Cards -->
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="VOXFIRE.io — Free Online Multiplayer Browser FPS" />
     <meta name="twitter:description" content="Fast 3D blocky shooter in your browser. 2 player, 4 player, global matchmaking, and private rooms with friends. 100% free, no download." />
+    <meta name="twitter:image" content="https://parshvashah2008.github.io/voxfire-io/og-image.svg" />
+    <meta name="theme-color" content="#ff7a1a" />
+    <link rel="manifest" href="./manifest.json" />
 
     <!-- Schema.org JSON-LD Structured Data for Google Rich Results & AI LLM Engines -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "VideoGame",
-      "name": "VOXFIRE.io",
-      "alternateName": ["Voxfire", "Voxfire FPS", "VOXFIRE io"],
-      "url": "https://parshvashah2008.github.io/voxfire-io/",
-      "description": "VOXFIRE.io is a fast-paced free online 3D blocky multiplayer browser first-person shooter (FPS). Play with friends in 2-player or 4-player private rooms or drop into global matches with online players worldwide. Features 20+ weapons, 4v4 Terrorist vs Anti-Terrorist, Team Deathmatch, and Gun Game.",
-      "genre": [
-        "First-Person Shooter",
-        "Multiplayer Game",
-        "Action Game",
-        "Online Game",
-        "IO Game"
-      ],
-      "gamePlatform": [
-        "Web Browser",
-        "PC",
-        "Mac",
-        "Mobile Phone",
-        "Tablet"
-      ],
-      "applicationCategory": "Game",
-      "operatingSystem": "All",
-      "playMode": [
-        "SinglePlayer",
-        "MultiPlayer",
-        "CoOp"
-      ],
-      "numberOfPlayers": {
-        "@type": "QuantitativeValue",
-        "minValue": 1,
-        "maxValue": 8
-      },
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD",
-        "availability": "https://schema.org/InStock"
-      }
+      "@graph": [
+        {
+          "@type": "VideoGame",
+          "@id": "https://parshvashah2008.github.io/voxfire-io/#game",
+          "name": "VOXFIRE.io",
+          "alternateName": ["Voxfire", "Voxfire FPS", "VOXFIRE io"],
+          "url": "https://parshvashah2008.github.io/voxfire-io/",
+          "description": "VOXFIRE.io is a fast-paced free online 3D blocky multiplayer browser first-person shooter (FPS). Play with friends in 2-player or 4-player private rooms or drop into global matches with online players worldwide. Features 20+ weapons, 4v4 Terrorist vs Anti-Terrorist, Team Deathmatch, and Gun Game.",
+          "genre": [
+            "First-Person Shooter",
+            "Multiplayer Game",
+            "Action Game",
+            "Online Game",
+            "IO Game"
+          ],
+          "gamePlatform": [
+            "Web Browser",
+            "PC",
+            "Mac",
+            "Mobile Phone",
+            "Tablet"
+          ],
+          "applicationCategory": "Game",
+          "operatingSystem": "All",
+          "playMode": [
+            "SinglePlayer",
+            "MultiPlayer",
+            "CoOp"
+          ],
+          "numberOfPlayers": {
+            "@type": "QuantitativeValue",
+            "minValue": 1,
+            "maxValue": 8
+          },
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock"
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://parshvashah2008.github.io/voxfire-io/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Is VOXFIRE.io free to play?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, VOXFIRE.io is 100% free to play directly in your web browser on PC, mobile phone, and tablet without downloading or installing anything."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I play VOXFIRE with 2 players or 4 players with friends?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes! In the Play menu, select 'Private Room - Play With Friends' to generate a 6-character room code and invite link. You can host 2-player 1v1 duels, 4-player matches, or up to 8-player custom lobbies with zero bots."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How does Global Players multiplayer work?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Global Players allows GTA Online-style public drop-in matchmaking. You can instantly jump into public matches worldwide across Free For All (FFA), Team Deathmatch (TDM), 4v4 Terrorist vs Anti-Terrorist (T vs AT), and Gun Game with zero bots."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does VOXFIRE.io work on mobile phones and tablets?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes, VOXFIRE.io includes dedicated touch controls, high refresh rate support (up to 120Hz), and Kour.io-style precision raycast auto-fire with recoil compensation designed specifically for mobile and tablet players."
+              }
+            }
+          ]
+        }
+      ]
     }
     </script>
 
