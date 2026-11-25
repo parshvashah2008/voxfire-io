@@ -39,8 +39,23 @@ const ICE_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
+    { urls: 'stun:stun4.l.google.com:19302' },
     { urls: 'stun:stun.cloudflare.com:3478' },
+    { urls: 'stun:global.stun.twilio.com:3478' },
+    { urls: 'stun:openrelay.metered.ca:80' },
+    {
+      urls: [
+        'turn:openrelay.metered.ca:80',
+        'turn:openrelay.metered.ca:443',
+        'turn:openrelay.metered.ca:443?transport=tcp',
+      ],
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
   ],
+  iceCandidatePoolSize: 10,
 };
 
 const isTeamMode = (mode) => mode === 'tdm' || mode === 'tva';
@@ -206,6 +221,7 @@ class RoomNet {
   startBgLoop() {
     if (this.bgTimer) clearInterval(this.bgTimer);
     let last = performance.now();
+    let lastKeepAlive = performance.now();
     this.bgTimer = setInterval(() => {
       const now = performance.now();
       const dt = Math.min(0.05, Math.max(0.001, (now - last) / 1000));
@@ -216,6 +232,12 @@ class RoomNet {
         && (game.state === 'playing' || game.state === 'paused')
       ) {
         game.update(dt);
+      }
+      if (now - lastKeepAlive > 3500) {
+        lastKeepAlive = now;
+        if (this.peer && !this.peer.destroyed && this.peer.disconnected) {
+          try { this.peer.reconnect(); } catch {}
+        }
       }
     }, 50);
   }
@@ -260,6 +282,11 @@ class RoomNet {
         this.hostRoom(presetMode);
         return;
       }
+      console.warn('Host peer error:', err);
+      if (err.type === 'network' || err.type === 'server-error' || err.type === 'socket-error' || err.type === 'socket-closed') {
+        try { peer.reconnect(); } catch {}
+        return;
+      }
       this.setStatus('', `Room error: ${err.message || err.type || 'connection failed'}`);
     });
 
@@ -292,7 +319,7 @@ class RoomNet {
 
     peer.on('open', () => {
       if (this.peer !== peer) return;
-      const conn = peer.connect(PEER_PREFIX + targetCode, { reliable: true });
+      const conn = peer.connect(PEER_PREFIX + targetCode);
       this.hostConn = conn;
 
       fallbackTimer = setTimeout(() => {
@@ -978,7 +1005,8 @@ class RoomNet {
 
     peer.on('open', () => {
       if (this.peer !== peer) return;
-      const conn = peer.connect(PEER_PREFIX + code, { reliable: true });
+      this.setStatus(`Found host for room ${code} — establishing direct connection...`);
+      const conn = peer.connect(PEER_PREFIX + code);
       this.hostConn = conn;
 
       const timeout = setTimeout(() => {
@@ -986,7 +1014,7 @@ class RoomNet {
           this.leaveRoom(true);
           this.setStatus('', `Could not reach room ${code}. Check the code or host status.`);
         }
-      }, 12000);
+      }, 25000);
 
       conn.on('open', () => {
         clearTimeout(timeout);
@@ -1063,6 +1091,7 @@ class RoomNet {
     switch (msg.t) {
       case 'welcome': {
         this.myId = msg.yourId;
+        this.myTeam = msg.yourTeam !== undefined ? msg.yourTeam : 0;
         this.members = msg.members || [];
         this.applySyncedCfg(msg.cfg);
         this.setStatus(msg.inMatch ? `Connected to ${this.roomCode} — joining match...` : `In room ${this.roomCode} — waiting for host to Deploy`);
